@@ -16,6 +16,8 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - csas-network
 
   pgadmin:
     image: dpage/pgadmin4:9
@@ -33,7 +35,13 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - csas-network
+
 
 volumes:
   postgres-data:
   pgadmin-data:
+
+networks:
+  csas-network:
