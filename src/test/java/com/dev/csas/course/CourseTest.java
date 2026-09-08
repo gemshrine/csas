@@ -1,6 +1,5 @@
 package com.dev.csas.course;
 
-import com.dev.csas.student.StudentID;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
