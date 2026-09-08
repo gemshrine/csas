@@ -1,7 +1,5 @@
 package com.dev.csas.course;
 
-import com.dev.csas.student.StudentID;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,9 +15,7 @@ public class Course {
 
     public long addWork(String title, int maxScore) {
 
-        if (!validateWork(maxScore)) {
-            throw new InvalidWorkMaxScoreException("Нельзя создать работу с количеством максимальных баллов равным 0");
-        }
+        validateWork(maxScore);
 
         long number = works.stream().mapToLong(Work::getNumber).max().orElse(0) + 1;
         Work work = new Work(number, title, maxScore);
@@ -64,9 +60,7 @@ public class Course {
 
     public void updateWorkMaxScore(long workNumber, int newMax) {
 
-        if (!validateWork(newMax)) {
-            throw new InvalidWorkMaxScoreException("Нельзя установить работе количество максимальных баллов равное 0");
-        }
+        validateWork(newMax);
 
         Work work = findWork(workNumber);
         work.updateMaxScore(newMax);
@@ -79,7 +73,7 @@ public class Course {
 
     private Score getScoreByWorkNumberAndStudentID(long workNumber, StudentID studentID) {
         return scores.stream()
-                .filter(score -> score.getStudentId() == studentID)
+                .filter(score -> score.getStudentId().equals(studentID))
                 .filter(score -> score.getWorkNumber() == workNumber)
                 .findFirst()
                 .orElse(null);
@@ -87,6 +81,9 @@ public class Course {
 
     public int getScore(long workNumber, StudentID studentID) {
         Score score = getScoreByWorkNumberAndStudentID(workNumber, studentID);
+        if (score == null) {
+            throw new ScoreNotFoundException("Оценка не найдена");
+        }
         return score.getScore();
     }
 
@@ -97,29 +94,31 @@ public class Course {
 
     private void validateStudentExists(StudentID studentID) {
         if (!isStudentExists(studentID)) {
-            throw new NonExistentStudentException("Указанного студента нет на данном курсе");
+            throw new NonExistentStudentException(String.format("Указанного студента нет на данном курсе: %s", studentID.id()));
         }
     }
 
-    private boolean validateWork(int maxScore) {
-        return maxScore > 0;
+    private void validateWork(int maxScore) {
+        if (maxScore <= 0) {
+            throw new InvalidWorkMaxScoreException("Нельзя создать работу с количеством максимальных баллов равным 0");
+        }
     }
 
     private Work findWork(long workNumber) {
         return works.stream()
                 .filter(w -> w.getNumber() == workNumber)
                 .findFirst()
-                .orElseThrow(() -> new WorkNotFoundException("Работа не найдена: " + workNumber));
+                .orElseThrow(() -> new WorkNotFoundException(String.format("Работа не найдена: %s", workNumber)));
     }
 
     private void validateScore(int score, Work work) {
         if (score > work.getMaxScore()) {
             throw new InvalidScoreValueException(
-                    "Оценка " + score + " превышает максимальный балл " + work.getMaxScore()
+                    String.format("Оценка %s превышает максимальный балл %s", score, work.getMaxScore())
             );
         }
         if (score < 0) {
-            throw new InvalidScoreValueException("Оценка не может быть отрицательной: " + score);
+            throw new InvalidScoreValueException(String.format("Оценка не может быть отрицательной: %s", score));
         }
     }
 
