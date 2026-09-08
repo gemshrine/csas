@@ -1,5 +1,6 @@
 package com.dev.csas.group;
 
+import com.dev.csas.teacher.TeacherJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -48,11 +49,9 @@ public class GroupJPAEntity {
     @Column(name = "education_form", nullable = false, length = 20)
     private String educationForm; // например, "очная", "заочная", "очно-заочная"
 
-    // Связь с преподавателем-куратором.
-    // Пока TeacherJPAEntity не создан, раскомментируйте после его появления.
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "curator_id")
-    // private TeacherJPAEntity curator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "curator_id")
+    private TeacherJPAEntity curator;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
