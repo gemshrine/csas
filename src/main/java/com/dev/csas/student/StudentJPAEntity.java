@@ -1,5 +1,6 @@
 package com.dev.csas.student;
 
+import com.dev.csas.group.GroupJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -66,7 +67,9 @@ public class StudentJPAEntity {
     @Column(name = "status", length = 20)
     private String status;
 
-    // Позже добавить @ManyToOne к GroupJPAEntity
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private GroupJPAEntity group;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
