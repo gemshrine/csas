@@ -1,3 +1,10 @@
 spring:
-  application:
-    name: csas
+  datasource:
+    url: jdbc:postgresql://localhost:5432/csas
+    username: csas
+    password: csas
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
