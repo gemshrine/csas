@@ -68,7 +68,8 @@
 цифры.
 
 Подробности в [domain-model.md](domain-model.md), правила в
-[business-rules.md](business-rules.md).
+[business-rules.md](business-rules.md)., работа со схемой базы в
+[migrations.md](migrations.md).
 
 ## Технологии
 
