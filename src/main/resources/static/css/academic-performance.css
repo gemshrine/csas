@@ -1,0 +1,168 @@
+/* Базовые настройки */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f7fafc;
+    color: #2d3748;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Шапка курса */
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #edf2f7;
+    margin-bottom: 32px;
+}
+
+.course-info-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.course-title {
+    font-size: 24px;
+    color: #1a202c;
+    font-weight: 700;
+}
+
+.divider {
+    color: #cbd5e0;
+    font-size: 20px;
+}
+
+.info-tag {
+    font-size: 18px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.status-badge {
+    background-color: #c6f6d5;
+    color: #22543d;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Профиль студента в шапке */
+.student-profile-info {
+    font-size: 15px;
+    color: #4a5568;
+    background-color: #f7fafc;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.student-profile-info strong {
+    color: #1a202c;
+}
+
+/* Таблица успеваемости */
+.table-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #edf2f7;
+    overflow-x: auto;
+}
+
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 15px;
+}
+
+/* Стили заголовков */
+.grades-table th {
+    background-color: #f8fafc;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 16px 20px;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.max-scores td {
+    background-color: #f8fafc;
+    color: #718096;
+    font-size: 13px;
+    padding: 0 20px 16px 20px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Ширина и выравнивание колонок */
+.col-fio {
+    width: 35%;
+}
+
+.student-name {
+    font-weight: 500;
+    color: #1a202c;
+}
+
+.grades-table td {
+    padding: 18px 20px; /* Немного увеличили паддинг для единственной строки */
+    border-bottom: 1px solid #edf2f7;
+}
+
+/* Центрирование баллов */
+.grades-table th:not(.col-fio),
+.grades-table td:not(.student-name) {
+    text-align: center;
+}
+
+.score {
+    color: #2d3748;
+    font-weight: 500;
+}
+
+/* Колонка рейтинга */
+.col-rating {
+    width: 15%;
+}
+
+.rating-value {
+    font-weight: 700;
+    color: #2b6cb0;
+    font-size: 16px;
+}
+
+/* Строка статична, убран эффект hover для ненажимаемости */
+.static-row {
+    background-color: #ffffff;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .course-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .student-profile-info {
+        width: 100%;
+        text-align: left;
+    }
+}

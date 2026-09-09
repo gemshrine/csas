@@ -1,0 +1,263 @@
+/* Базовые настройки */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f7fafc;
+    color: #2d3748;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Шапка страницы */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 24px;
+}
+
+.system-context {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.page-header h1 {
+    font-size: 26px;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 15px;
+}
+
+/* Кнопки */
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-success {
+    background-color: #38a169;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(56, 161, 105, 0.2);
+}
+
+.btn-success:hover {
+    background-color: #2f855a;
+    box-shadow: 0 6px 16px rgba(56, 161, 105, 0.3);
+}
+
+/* Панель управления (Поиск + Фильтры) */
+.controls-panel {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    font-size: 16px;
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background-color: #fff;
+    transition: border-color 0.2s;
+}
+
+.search-wrapper input:focus {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.filters-wrapper {
+    display: flex;
+    gap: 12px;
+}
+
+.filters-wrapper select {
+    padding: 12px 16px;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+    outline: none;
+    cursor: pointer;
+    color: #4a5568;
+}
+
+.filters-wrapper select:focus {
+    border-color: #3182ce;
+}
+
+/* Таблица реестра */
+.table-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #edf2f7;
+    overflow-x: auto;
+}
+
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 15px;
+}
+
+.students-table th {
+    background-color: #f8fafc;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 16px 20px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.students-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+}
+
+.students-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Колонки и элементы строк */
+.col-id { width: 15%; }
+.col-fio { width: 45%; }
+.col-group { width: 15%; }
+.col-status { width: 15%; }
+.col-actions { width: 100px; text-align: center; }
+
+.student-id {
+    font-family: monospace;
+    font-size: 14px;
+    color: #718096;
+    font-weight: 600;
+}
+
+.student-name {
+    font-weight: 500;
+    color: #1a202c;
+}
+
+/* Бейджи групп */
+.group-badge {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Статусы */
+.status-indicator {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: #e6fffa;
+    color: #234e52;
+}
+
+.status-academic {
+    background-color: #feebc8;
+    color: #744210;
+}
+
+/* Кнопки действий */
+.actions-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.action-btn {
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.edit-btn:hover {
+    background-color: #ebf8ff;
+    border-color: #bee3f8;
+}
+
+.delete-btn:hover {
+    background-color: #fff5f5;
+    border-color: #fed7d7;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .controls-panel {
+        flex-direction: column;
+    }
+    .filters-wrapper {
+        width: 100%;
+    }
+    .filters-wrapper select {
+        flex: 1;
+    }
+}
