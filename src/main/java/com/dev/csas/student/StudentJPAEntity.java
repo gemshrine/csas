@@ -2,6 +2,7 @@ package com.dev.csas.student;
 
 import com.dev.csas.enums.GenderEnum;
 import com.dev.csas.enums.EducationFormEnum;
+import com.dev.csas.enums.StudyFormEnum;
 import com.dev.csas.enums.StudentStatusEnum;
 import com.dev.csas.user.UserJPAEntity;
 import com.dev.csas.group.GroupJPAEntity;
@@ -66,6 +67,10 @@ public class StudentJPAEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "education_form", length = 20)
     private EducationFormEnum educationForm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "study_form")
+    private StudyFormEnum studyForm;
 
     @Column(name = "enrollment_date")
     private LocalDate enrollmentDate;
