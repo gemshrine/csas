@@ -74,7 +74,7 @@ public class CourseTest {
     }
 
     @Test
-    void ratingWithoutWorksAndScoresWillReturn100() {
+    void ratingWithoutWorksAndScoresShouldReturn100() {
         Course course = new Course(List.of(student));
 
         assertThat(course.rating(student)).isEqualTo(100.0);
@@ -158,6 +158,17 @@ public class CourseTest {
 
         assertThatThrownBy(() -> course.updateWorkDate(workNumber, null))
                 .isInstanceOf(InvalidWorkDateException.class);
+    }
+
+    @Test
+    void initialScoreShouldBe0() {
+        StudentID secondStudent = new StudentID(2);
+        Course course = new Course(List.of(student, secondStudent));
+        LocalDate date = LocalDate.of(2026, 9, 12);
+        long work = course.addWork("Лабораторная 1", 20, date);
+
+        assertThat(course.getScore(work, student)).isEqualTo(0);
+        assertThat(course.getScore(work, secondStudent)).isEqualTo(0);
     }
 
 }
