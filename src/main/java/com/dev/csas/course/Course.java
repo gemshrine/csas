@@ -23,6 +23,8 @@ public class Course {
         Work work = new Work(number, title, maxScore, date);
         works.add(work);
 
+        initializeScore(number);
+
         return number;
     }
 
@@ -78,6 +80,10 @@ public class Course {
 
         Work work = findWork(workNumber);
         work.updateDate(newDate);
+    }
+
+    private void initializeScore(long workNumber) {
+        studentIDList.forEach(student -> score(workNumber, student, 0));
     }
 
     private Score getScoreByWorkNumberAndStudentID(long workNumber, StudentID studentID) {
