@@ -1,0 +1,146 @@
+/* Настройки боковой панели */
+.sidebar {
+    width: 260px;
+    background-color: #1a202c; /* Темный графитовый цвет */
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Логотип */
+.sidebar-brand {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #2d3748;
+}
+
+.sidebar-brand .icon {
+    font-size: 24px;
+}
+
+.sidebar-brand h2 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Навигационные ссылки */
+.sidebar-menu {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+}
+
+/* Стили заголовков категорий */
+.menu-category {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #4a5568;
+    font-weight: 700;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    padding-left: 12px;
+}
+
+.menu-category:first-child {
+    margin-top: 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    color: #a0aec0; /* Сероватый цвет для неактивных пунктов */
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* Эффект наведения и активное состояние */
+.menu-item:hover {
+    background-color: #2d3748;
+    color: #ffffff;
+}
+
+.menu-item.active {
+    background-color: #3182ce; /* Фирменный синий цвет */
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.menu-icon {
+    font-size: 15px;
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+}
+
+/* Блок пользователя в подвале */
+.sidebar-user {
+    padding: 16px;
+    border-top: 1px solid #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #141923; /* Чуть темнее основного фона */
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #4a5568;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.user-role {
+    font-size: 12px;
+    color: #a0aec0;
+}
+
+.logout-btn {
+    text-decoration: none;
+    font-size: 18px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    opacity: 1;
+}

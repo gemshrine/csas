@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Навигация</title>
+    <link rel="stylesheet" href="../../static/css/menu.css">
+</head>
+<body>
+
+<!-- Боковая панель навигации (Sidebar) -->
+<aside class="sidebar">
+    <!-- Брендинг / Логотип системы -->
+    <div class="sidebar-brand">
+        <span class="icon">🎓</span>
+        <h2>Учет успеваемости</h2>
+    </div>
+
+    <!-- Скроллируемое меню со ссылками -->
+    <nav class="sidebar-menu">
+
+        <div class="menu-category">Преподаватель</div>
+        <a href="courses.html" class="menu-item active">
+            <span class="menu-icon">📚</span> Мои курсы
+        </a>
+        <a href="course-detail.html" class="menu-item">
+            <span class="menu-icon">📊</span> Журнал успеваемости
+        </a>
+        <a href="edit-work.html" class="menu-item">
+            <span class="menu-icon">📝</span> Ввод баллов
+        </a>
+
+        <div class="menu-category">Деканат</div>
+        <a href="students-list.html" class="menu-item">
+            <span class="menu-icon">👥</span> Реестр студентов
+        </a>
+
+        <div class="menu-category">Студент</div>
+        <a href="student-grades.html" class="menu-item">
+            <span class="menu-icon">👤</span> Моя успеваемость
+        </a>
+
+    </nav>
+
+    <!-- Блок авторизованного пользователя в самом низу -->
+    <div class="sidebar-user">
+        <div class="user-avatar">ИП</div>
+        <div class="user-info">
+            <span class="user-name">Иван Петров</span>
+            <span class="user-role">Преподаватель</span>
+        </div>
+        <a href="index.html" class="logout-btn" title="Выйти">🚪</a>
+    </div>
+</aside>
+
+</body>
+</html>

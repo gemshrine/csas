@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление студентами | Деканат</title>
+    <link rel="stylesheet" href="../static/css/students-list.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- Шапка панели деканата -->
+    <header class="page-header">
+        <div>
+            <span class="system-context">Панель администратора • Деканат</span>
+            <h1>Реестр студентов</h1>
+            <p class="subtitle">Управление личными делами, группами и статусом обучения</p>
+        </div>
+
+        <!-- Кнопка создания нового студента -->
+        <div>
+            <button class="btn btn-success">➕ Добавить студента</button>
+        </div>
+    </header>
+
+    <!-- Панель фильтров и поиска -->
+    <section class="controls-panel">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Поиск по ФИО, номеру зачетки или группе...">
+        </div>
+        <div class="filters-wrapper">
+            <select name="filter-group">
+                <option value="">Все группы</option>
+                <option value="ист-21">ИСТ-21</option>
+                <option value="ивт-301">ИВТ-301</option>
+                <option value="пин-302">ПИН-302</option>
+            </select>
+            <select name="filter-status">
+                <option value="">Все статусы</option>
+                <option value="active">Обучается</option>
+                <option value="academic">Академ. отпуск</option>
+            </select>
+        </div>
+    </section>
+
+    <!-- Таблица студентов -->
+    <section class="table-container">
+        <table class="students-table">
+            <thead>
+            <tr>
+                <th class="col-id">№ Зачетки</th>
+                <th class="col-fio">ФИО студента</th>
+                <th class="col-group">Группа</th>
+                <th class="col-status">Статус</th>
+                <th class="col-actions">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Студент 1 -->
+            <tr>
+                <td class="student-id">21-ИСТ-042</td>
+                <td class="student-name">Иванов Алексей Александрович</td>
+                <td><span class="group-badge">ИСТ-21</span></td>
+                <td><span class="status-indicator status-active">Обучается</span></td>
+                <td>
+                    <div class="actions-group">
+                        <button class="action-btn edit-btn" title="Редактировать">✏️</button>
+                        <button class="action-btn delete-btn" title="Удалить">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <!-- Студент 2 -->
+            <tr>
+                <td class="student-id">21-ИСТ-059</td>
+                <td class="student-name">Петрова Мария Игоревна</td>
+                <td><span class="group-badge">ИСТ-21</span></td>
+                <td><span class="status-indicator status-active">Обучается</span></td>
+                <td>
+                    <div class="actions-group">
+                        <button class="action-btn edit-btn" title="Редактировать">✏️</button>
+                        <button class="action-btn delete-btn" title="Удалить">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            <!-- Студент 3 -->
+            <tr>
+                <td class="student-id">20-ИВТ-112</td>
+                <td class="student-name">Сидоров Кирилл Владимирович</td>
+                <td><span class="group-badge">ИВТ-301</span></td>
+                <td><span class="status-indicator status-academic">Академ. отпуск</span></td>
+                <td>
+                    <div class="actions-group">
+                        <button class="action-btn edit-btn" title="Редактировать">✏️</button>
+                        <button class="action-btn delete-btn" title="Удалить">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+</body>
+</html>

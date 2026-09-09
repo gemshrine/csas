@@ -1,0 +1,222 @@
+/* Базовые настройки */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f7fafc;
+    color: #2d3748;
+    min-height: 100vh;
+}
+
+/* Центральный контейнер */
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* Шапка контента */
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 20px;
+}
+
+.content-header h1 {
+    font-size: 26px;
+    color: #1a202c;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #718096;
+    font-size: 15px;
+}
+
+/* Блок профиля в шапке */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.academic-year {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+
+
+/* Фильтры */
+.filters-section {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.search-box input {
+    width: 320px;
+    padding: 10px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #3182ce;
+}
+
+.select-box select {
+    padding: 10px 16px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Сетка карточек (Grid) */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+/* Карточка курса */
+.course-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    border: 1px solid #edf2f7;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-card:hover:not(.disabled) {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+}
+
+.course-badge {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background-color: #e6fffa;
+    color: #234e52;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.course-badge.semester-next {
+    background-color: #edf2f7;
+    color: #4a5568;
+}
+
+.course-title {
+    font-size: 18px;
+    color: #1a202c;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding-right: 60px;
+    line-height: 1.4;
+}
+
+.course-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #4a5568;
+}
+
+.meta-icon {
+    font-size: 16px;
+}
+
+/* Футер карточки */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #edf2f7;
+    padding-top: 16px;
+}
+
+.students-count {
+    font-size: 13px;
+    color: #718096;
+}
+
+.card-btn {
+    background-color: #3182ce;
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.card-btn:hover {
+    background-color: #2b6cb0;
+}
+
+/* Состояние для будущих курсов */
+.course-card.disabled {
+    opacity: 0.65;
+    background-color: #f8fafc;
+}
+
+.course-card.disabled .card-btn {
+    background-color: #cbd5e0;
+    color: #718096;
+    cursor: not-allowed;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .filters-section {
+        flex-direction: column;
+    }
+    .search-box input {
+        width: 100%;
+    }
+}

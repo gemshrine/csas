@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя успеваемость | Учет успеваемости</title>
+    <link rel="stylesheet" href="../static/css/academic-performance.css">
+</head>
+<body>
+
+<div class="page-container">
+
+    <!-- Шапка курса для студента -->
+    <header class="course-header">
+        <div class="course-info-block">
+            <h1 class="course-title">Базы данных</h1>
+            <span class="divider">•</span>
+            <span class="info-tag group-tag">ИСТ-21</span>
+            <span class="divider">•</span>
+            <span class="info-tag semester-tag">осень 2026</span>
+            <span class="divider">•</span>
+            <span class="status-badge active-status">ИДЁТ</span>
+        </div>
+
+        <!-- Вместо кнопок действий выводится ФИО студента, чей это кабинет -->
+        <div class="student-profile-info">
+            Студент: <strong>Иванов А.А.</strong>
+        </div>
+    </header>
+
+    <!-- Таблица успеваемости (одна строка с оценками) -->
+    <section class="table-container">
+        <table class="grades-table">
+            <thead>
+            <!-- Первая строка заголовка: Названия колонок -->
+            <tr>
+                <th class="col-fio">ФИО</th>
+                <th>Лаб.1</th>
+                <th>Лаб.2</th>
+                <th>К/р</th>
+                <th>Семинар</th>
+                <th class="col-rating">Рейтинг</th>
+            </tr>
+            <!-- Вторая строка заголовка: Максимальные баллы -->
+            <tr class="max-scores">
+                <td></td>
+                <td>(20)</td>
+                <td>(20)</td>
+                <td>(40)</td>
+                <td>(5)</td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Только одна строка текущего студента без ховеров и кликов -->
+            <tr class="static-row">
+                <td class="student-name">Иванов А.А.</td>
+                <td class="score">18</td>
+                <td class="score">15</td>
+                <td class="score">32</td>
+                <td class="score">5</td>
+                <td class="rating-value">82.4</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+</body>
+</html>

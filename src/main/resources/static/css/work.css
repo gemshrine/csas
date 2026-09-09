@@ -1,0 +1,197 @@
+/* Базовые настройки */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f7fafc;
+    color: #2d3748;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.page-container {
+    max-width: 700px; /* Сузили контейнер, чтобы список ввода не растягивался и был перед глазами */
+    margin: 0 auto;
+}
+
+/* Навигация */
+.navigation-back {
+    margin-bottom: 20px;
+}
+
+.back-link {
+    color: #3182ce;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    color: #2b6cb0;
+    text-decoration: underline;
+}
+
+/* Шапка работы */
+.work-header {
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #edf2f7;
+    margin-bottom: 24px;
+}
+
+.course-context {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #718096;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.work-header h1 {
+    font-size: 22px;
+    color: #1a202c;
+    margin-bottom: 8px;
+}
+
+.max-score-info {
+    font-size: 15px;
+    color: #4a5568;
+}
+
+.max-score-info strong {
+    color: #2b6cb0;
+}
+
+/* Контейнер списка */
+.students-list-container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    border: 1px solid #edf2f7;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+/* Шапка списка */
+.list-header {
+    background-color: #f8fafc;
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #edf2f7;
+    font-weight: 600;
+    font-size: 14px;
+    color: #4a5568;
+}
+
+.hdr-fio {
+    flex: 1;
+}
+
+.hdr-score {
+    width: 120px;
+    text-align: center;
+}
+
+/* Строка студента */
+.student-row {
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #edf2f7;
+    transition: background-color 0.15s ease;
+}
+
+.student-row:last-child {
+    border-bottom: none;
+}
+
+.student-row:hover {
+    background-color: #f8fafc;
+}
+
+.student-name {
+    flex: 1;
+    font-weight: 500;
+    color: #1a202c;
+    cursor: pointer; /* Клик по имени сфокусирует инпут */
+}
+
+/* Группа ввода баллов */
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 120px;
+    justify-content: flex-end;
+}
+
+.score-input {
+    width: 70px;
+    padding: 8px 10px;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: all 0.2s ease;
+    -moz-appearance: textfield; /* Убираем стрелочки в Firefox */
+}
+
+/* Убираем стрелочки инпута "number" в Chrome/Safari/Edge */
+.score-input::-webkit-outer-spin-button,
+.score-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.score-input:focus {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    background-color: #fff;
+}
+
+.score-limit {
+    font-size: 13px;
+    color: #a0aec0;
+    font-weight: 500;
+}
+
+/* Нижняя панель с кнопкой сохранения */
+.form-actions {
+    text-align: right;
+}
+
+.save-btn {
+    background-color: #3182ce;
+    color: #ffffff;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+    transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+    background-color: #2b6cb0;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(49, 130, 206, 0.3);
+}
+
+.save-btn:active {
+    background-color: #2c5282;
+    transform: translateY(0);
+}

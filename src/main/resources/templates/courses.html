@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мои курсы | Учет успеваемости</title>
+  <link rel="stylesheet" href="../static/css/courses.css">
+</head>
+<body>
+
+<!-- Основной контейнер страницы -->
+<div class="page-container">
+
+  <!-- Верхняя шапка (Панель пользователя и название) -->
+  <header class="content-header">
+    <div>
+      <h1>Мои дисциплины и курсы</h1>
+      <p class="subtitle">Управление учебными группами и текущей успеваемостью</p>
+    </div>
+
+    <div class="header-right">
+      <div class="academic-year">2026/2027 уч. год</div>
+
+    </div>
+  </header>
+
+  <!-- Блок фильтрации -->
+  <section class="filters-section">
+    <div class="search-box">
+      <input type="text" placeholder="Поиск по дисциплине или группе...">
+    </div>
+    <div class="select-box">
+      <select name="semester">
+        <option value="">Все семестры</option>
+        <option value="1">Осенний (Семестр 1)</option>
+        <option value="2">Весенний (Семестр 2)</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Сетка карточек курсов -->
+  <section class="courses-grid">
+
+    <!-- Карточка 1 -->
+    <div class="course-card">
+      <div class="course-badge">Семестр 1</div>
+      <h3 class="course-title">Архитектура информационных систем</h3>
+      <div class="course-meta">
+        <div class="meta-item">
+          <span class="meta-icon">👥</span>
+          <span class="meta-text">Группа: <strong>ИВТ-301</strong></span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📅</span>
+          <span class="meta-text">Тип: Лекции и практики</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="students-count">24 студента</span>
+        <a href="#" class="card-btn">Открыть журнал</a>
+      </div>
+    </div>
+
+    <!-- Карточка 2 -->
+    <div class="course-card">
+      <div class="course-badge">Семестр 1</div>
+      <h3 class="course-title">Базы данных и SQL</h3>
+      <div class="course-meta">
+        <div class="meta-item">
+          <span class="meta-icon">👥</span>
+          <span class="meta-text">Группа: <strong>ИВТ-301</strong></span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📅</span>
+          <span class="meta-text">Тип: Лабораторные работы</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="students-count">24 студента</span>
+        <a href="#" class="card-btn">Открыть журнал</a>
+      </div>
+    </div>
+
+    <!-- Карточка 3 -->
+    <div class="course-card">
+      <div class="course-badge">Семестр 1</div>
+      <h3 class="course-title">Разработка веб-приложений</h3>
+      <div class="course-meta">
+        <div class="meta-item">
+          <span class="meta-icon">👥</span>
+          <span class="meta-text">Группа: <strong>ПИН-302</strong></span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📅</span>
+          <span class="meta-text">Тип: Курсовой проект</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="students-count">18 студентов</span>
+        <a href="#" class="card-btn">Открыть журнал</a>
+      </div>
+    </div>
+
+    <!-- Карточка 4 -->
+    <div class="course-card disabled">
+      <div class="course-badge semester-next">Семестр 2</div>
+      <h3 class="course-title">Проектирование интерфейсов (UI/UX)</h3>
+      <div class="course-meta">
+        <div class="meta-item">
+          <span class="meta-icon">👥</span>
+          <span class="meta-text">Группа: <strong>ПИН-302</strong></span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📅</span>
+          <span class="meta-text">Тип: Лекции</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="students-count">Еще не начался</span>
+        <button class="card-btn" disabled>Журнал закрыт</button>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+</body>
+</html>

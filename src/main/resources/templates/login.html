@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход | Учет успеваемости студентов</title>
+    <!-- Подключение внешнего файла стилей -->
+    <link rel="stylesheet" href="../static/css/login.css">
+</head>
+<body>
+
+<div class="login-container">
+    <!-- Шапка с названием -->
+    <div class="logo-area">
+        <div class="icon">🎓</div>
+        <h1>Учет успеваемости</h1>
+        <p>Электронный кабинет студента и преподавателя</p>
+    </div>
+
+    <!-- Форма авторизации -->
+    <form action="/login-endpoint" method="POST">
+
+        <!-- Поле Логин / Email -->
+        <div class="form-group">
+            <label for="username">Логин или Email</label>
+            <div class="input-wrapper">
+                <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Введите ваш логин"
+                        required
+                        autocomplete="username"
+                >
+            </div>
+        </div>
+
+        <!-- Поле Пароль -->
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <div class="input-wrapper">
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="••••••••"
+                        required
+                        autocomplete="current-password"
+                >
+            </div>
+        </div>
+
+        <!-- Чекбокс и ссылка -->
+        <div class="form-options">
+            <label class="remember-me">
+                <input type="checkbox" name="remember"> Запомнить меня
+            </label>
+            <a href="#" class="forgot-password">Забыли пароль?</a>
+        </div>
+
+        <!-- Кнопка Входа -->
+        <button type="submit" class="submit-btn">Войти в систему</button>
+    </form>
+
+    <!-- Подвал -->
+    <div class="login-footer">
+        &copy; 2026 Университетская информационная система
+    </div>
+</div>
+
+</body>
+</html>
