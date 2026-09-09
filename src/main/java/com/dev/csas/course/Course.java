@@ -1,5 +1,6 @@
 package com.dev.csas.course;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +14,13 @@ public class Course {
         this.studentIDList = List.copyOf(studentIDList);
     }
 
-    public long addWork(String title, int maxScore) {
+    public long addWork(String title, int maxScore, LocalDate date) {
 
-        validateWork(maxScore);
+        validateWorkMaxScore(maxScore);
+        validateWorkDate(date);
 
         long number = works.stream().mapToLong(Work::getNumber).max().orElse(0) + 1;
-        Work work = new Work(number, title, maxScore);
+        Work work = new Work(number, title, maxScore, date);
         works.add(work);
 
         return number;
@@ -60,7 +62,7 @@ public class Course {
 
     public void updateWorkMaxScore(long workNumber, int newMax) {
 
-        validateWork(newMax);
+        validateWorkMaxScore(newMax);
 
         Work work = findWork(workNumber);
         work.updateMaxScore(newMax);
@@ -69,6 +71,13 @@ public class Course {
     public void updateWorkTitle(long workNumber, String newTitle) {
         Work work = findWork(workNumber);
         work.updateTitle(newTitle);
+    }
+
+    public void updateWorkDate(long workNumber, LocalDate newDate) {
+        validateWorkDate(newDate);
+
+        Work work = findWork(workNumber);
+        work.updateDate(newDate);
     }
 
     private Score getScoreByWorkNumberAndStudentID(long workNumber, StudentID studentID) {
@@ -98,9 +107,15 @@ public class Course {
         }
     }
 
-    private void validateWork(int maxScore) {
+    private void validateWorkMaxScore(int maxScore) {
         if (maxScore <= 0) {
             throw new InvalidWorkMaxScoreException("Нельзя создать работу с количеством максимальных баллов равным 0");
+        }
+    }
+
+    private void validateWorkDate(LocalDate date) {
+        if (date == null) {
+            throw new InvalidWorkDateException("Нельзя создать работу с пустой датой");
         }
     }
 
@@ -122,4 +137,7 @@ public class Course {
         }
     }
 
+    public LocalDate getWorkDate(long workNumber) {
+        return findWork(workNumber).getDate();
+    }
 }
