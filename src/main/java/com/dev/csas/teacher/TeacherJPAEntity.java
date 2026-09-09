@@ -1,5 +1,6 @@
 package com.dev.csas.teacher;
 
+import com.dev.csas.user.UserJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -57,6 +58,10 @@ public class TeacherJPAEntity {
     @Size(max = 20, message = "Телефон не должен превышать 20 символов")
     @Column(name = "phone", length = 20)
     private String phone;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private UserJPAEntity user;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp

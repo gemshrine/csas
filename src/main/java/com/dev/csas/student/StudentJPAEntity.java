@@ -1,5 +1,9 @@
 package com.dev.csas.student;
 
+import com.dev.csas.enums.GenderEnum;
+import com.dev.csas.enums.EducationFormEnum;
+import com.dev.csas.enums.StudentStatusEnum;
+import com.dev.csas.user.UserJPAEntity;
 import com.dev.csas.group.GroupJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -55,21 +59,28 @@ public class StudentJPAEntity {
     @Column(name = "phone", length = 20)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender", length = 10)
-    private String gender;
+    private GenderEnum gender;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "education_form", length = 20)
-    private String educationForm;
+    private EducationFormEnum educationForm;
 
     @Column(name = "enrollment_date")
     private LocalDate enrollmentDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)
-    private String status;
+    private StudentStatusEnum status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private GroupJPAEntity group;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    private UserJPAEntity user;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp

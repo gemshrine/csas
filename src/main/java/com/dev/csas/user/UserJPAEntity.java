@@ -31,10 +31,10 @@ public class UserJPAEntity {
     @Column(name = "password", nullable = false, length = 100)
     private String password; // хранится в виде BCrypt-хеша
 
-    @NotBlank(message = "Роль обязательна")
-    @Size(max = 20, message = "Роль не должна превышать 20 символов")
-    @Column(name = "role", nullable = false, length = 20)
-    private String role; // ADMIN, DEAN, TEACHER, STUDENT
+    @NotNull(message = "Роль обязательна")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private RoleEnum role;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled; // активен ли пользователь

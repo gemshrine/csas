@@ -46,10 +46,10 @@ public class DisciplineJPAEntity {
     private Integer labHours;
 
     // Форма контроля: EXAM, DIFF_CREDIT, CREDIT
-    @NotBlank(message = "Форма контроля обязательна")
-    @Size(max = 20, message = "Форма контроля не должна превышать 20 символов")
+    @NotNull(message = "Форма контроля обязательна")
+    @Enumerated(EnumType.STRING)
     @Column(name = "control_form", nullable = false, length = 20)
-    private String controlForm;
+    private ControlFormEnum controlForm;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp

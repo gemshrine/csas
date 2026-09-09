@@ -1,5 +1,6 @@
 package com.dev.csas.group;
 
+import com.dev.csas.enums.EducationFormEnum;
 import com.dev.csas.teacher.TeacherJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -44,10 +45,10 @@ public class GroupJPAEntity {
     @Column(name = "course", nullable = false)
     private Integer course;
 
-    @NotBlank(message = "Форма обучения обязательна")
-    @Size(max = 20, message = "Форма обучения не должна превышать 20 символов")
+    @NotNull(message = "Форма обучения обязательна")
+    @Enumerated(EnumType.STRING)
     @Column(name = "education_form", nullable = false, length = 20)
-    private String educationForm; // например, "очная", "заочная", "очно-заочная"
+    private EducationFormEnum educationForm;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curator_id")
