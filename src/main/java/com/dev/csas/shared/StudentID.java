@@ -1,4 +1,4 @@
-package com.dev.csas.course;
+package com.dev.csas.shared;
 
 import java.util.Objects;
 
