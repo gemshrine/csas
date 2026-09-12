@@ -34,7 +34,7 @@ class ControlSheetTest {
         ControlSheet sheet = new ControlSheet(course, ControlFormEnum.EXAM, scale);
 
         sheet.enterNumericResult(seminarTeacher, student, 70);
-        sheet.close();
+        sheet.close(seminarTeacher);
 
         assertThat(sheet.finalScore(student)).isEqualTo(75.0);
         assertThat(sheet.finalGrade(student)).isEqualTo(4);
@@ -76,8 +76,29 @@ class ControlSheetTest {
         ControlSheet sheet = new ControlSheet(course, ControlFormEnum.EXAM, scale);
         sheet.enterNumericResult(seminarTeacher, student, 70);
 
-        assertThatThrownBy(sheet::close)
+        assertThatThrownBy(() -> sheet.close(seminarTeacher))
                 .isInstanceOf(IncompleteControlSheetException.class);
+    }
+
+    @Test
+    void onlySeminarTeacherCanCloseSheet() {
+        Course course = completedCourseWithRating(80);
+        ControlSheet sheet = new ControlSheet(course, ControlFormEnum.EXAM, scale);
+        sheet.enterNumericResult(seminarTeacher, student, 70);
+
+        assertThatThrownBy(() -> sheet.close(lectureTeacher))
+                .isInstanceOf(UnauthorizedTeacherException.class);
+    }
+
+    @Test
+    void closedSheetRejectsNewResult() {
+        Course course = completedCourseWithRating(80);
+        ControlSheet sheet = new ControlSheet(course, ControlFormEnum.EXAM, scale);
+        sheet.enterNumericResult(seminarTeacher, student, 70);
+        sheet.close(seminarTeacher);
+
+        assertThatThrownBy(() -> sheet.enterNumericResult(seminarTeacher, student, 90))
+                .isInstanceOf(ControlSheetException.class);
     }
 
     private Course course() {
