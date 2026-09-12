@@ -1,5 +1,7 @@
 package com.dev.csas.course;
 
+import com.dev.csas.shared.StudentID;
+
 public class Score {
     private long workNumber;
     private StudentID studentId;

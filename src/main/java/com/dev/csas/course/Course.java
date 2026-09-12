@@ -1,5 +1,8 @@
 package com.dev.csas.course;
 
+import com.dev.csas.shared.StudentID;
+import com.dev.csas.shared.TeacherID;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +12,23 @@ public class Course {
     private final List<StudentID> studentIDList;
     private final List<Work> works = new ArrayList<>();
     private final List<Score> scores = new ArrayList<>();
+    private final TeacherID seminarTeacher;
+    private final TeacherID lectureTeacher;
+    private CourseStatus status = CourseStatus.IN_PROGRESS;
 
     public Course(List<StudentID> studentIDList) {
+        this(studentIDList, null, null);
+    }
+
+    public Course(List<StudentID> studentIDList, TeacherID seminarTeacher, TeacherID lectureTeacher) {
         this.studentIDList = List.copyOf(studentIDList);
+        this.seminarTeacher = seminarTeacher;
+        this.lectureTeacher = lectureTeacher;
     }
 
     public long addWork(String title, int maxScore, LocalDate date) {
 
+        validateInProgress();
         validateWorkMaxScore(maxScore);
         validateWorkDate(date);
 
@@ -30,6 +43,7 @@ public class Course {
 
     public void score(long workNumber, StudentID studentID, int earnedScore) {
 
+        validateInProgress();
         validateStudentExists(studentID);
 
         Work work = findWork(workNumber);
@@ -64,6 +78,7 @@ public class Course {
 
     public void updateWorkMaxScore(long workNumber, int newMax) {
 
+        validateInProgress();
         validateWorkMaxScore(newMax);
 
         Work work = findWork(workNumber);
@@ -71,11 +86,13 @@ public class Course {
     }
 
     public void updateWorkTitle(long workNumber, String newTitle) {
+        validateInProgress();
         Work work = findWork(workNumber);
         work.updateTitle(newTitle);
     }
 
     public void updateWorkDate(long workNumber, LocalDate newDate) {
+        validateInProgress();
         validateWorkDate(newDate);
 
         Work work = findWork(workNumber);
@@ -145,5 +162,42 @@ public class Course {
 
     public LocalDate getWorkDate(long workNumber) {
         return findWork(workNumber).getDate();
+    }
+
+    public void complete() {
+        if (works.isEmpty()) {
+            throw new CourseWithoutWorksException("Нельзя завершить курс без работ");
+        }
+        status = CourseStatus.COMPLETED;
+    }
+
+    public boolean isCompleted() {
+        return status == CourseStatus.COMPLETED;
+    }
+
+    public CourseStatus status() {
+        return status;
+    }
+
+    public TeacherID seminarTeacher() {
+        return seminarTeacher;
+    }
+
+    public TeacherID lectureTeacher() {
+        return lectureTeacher;
+    }
+
+    public List<StudentID> students() {
+        return studentIDList;
+    }
+
+    public boolean hasStudent(StudentID studentID) {
+        return isStudentExists(studentID);
+    }
+
+    private void validateInProgress() {
+        if (status != CourseStatus.IN_PROGRESS) {
+            throw new IllegalStateException("Завершённый курс нельзя изменять");
+        }
     }
 }

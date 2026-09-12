@@ -1,5 +1,7 @@
 package com.dev.csas.course;
 
+import com.dev.csas.shared.StudentID;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
