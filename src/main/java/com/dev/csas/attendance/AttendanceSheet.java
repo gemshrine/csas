@@ -4,9 +4,7 @@ import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.Course;
 import com.dev.csas.course.CourseCompletedException;
 import com.dev.csas.course.NonExistentStudentException;
-import com.dev.csas.shared.LectureID;
-import com.dev.csas.shared.StudentID;
-import com.dev.csas.shared.TeacherID;
+import com.dev.csas.shared.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -25,13 +23,12 @@ public class AttendanceSheet {
     }
 
     public void addLecture(TeacherID teacherID, LectureID lectureID, LocalDate date, String title) {
+        validateOpen();
+        validateTeacher(teacherID);
 
         if (findLecture(lectureID) != null) {
             throw new DuplicateLectureException("Лекция уже существует");
         }
-
-        validateOpen();
-        validateTeacher(teacherID);
 
         lectures.add(new Lecture(lectureID, date, title));
     }
@@ -59,8 +56,20 @@ public class AttendanceSheet {
 
     public void close(TeacherID teacherID) {
         validateTeacher(teacherID);
+        validateOpen();
         validateAllStudentsRegistered();
+
         this.status = AttendanceSheetStatus.CLOSED;
+    }
+
+    public void archive(DeanID dean) {
+        Objects.requireNonNull(dean, "Деканат обязателен");
+
+        if (status != AttendanceSheetStatus.CLOSED) {
+            throw new SheetStatusException("Архивировать можно только закрытую ведомость");
+        }
+
+        this.status = AttendanceSheetStatus.ARCHIVED;
     }
 
     public AttendanceSheetStatus status() {
@@ -68,7 +77,11 @@ public class AttendanceSheet {
     }
 
     public Map<StudentID, AttendanceRecord> getAttendances(LectureID lectureID) {
-        return Collections.unmodifiableMap(attendances.get(lectureID));
+        if (findLecture(lectureID) == null) {
+            throw new LectureNotFoundException(String.format("Лекция не найдена: %s", lectureID));
+        }
+
+        return Map.copyOf(attendances.getOrDefault(lectureID,  Collections.emptyMap()));
     }
 
     private Lecture findLecture(LectureID lectureID) {
@@ -86,7 +99,7 @@ public class AttendanceSheet {
 
     private void validateOpen() {
         if (status != AttendanceSheetStatus.OPEN || course.isCompleted()) {
-            throw new AttendanceSheetClosedException("Нельзя вносить измнения вносить изменения в закрытую ведомость");
+            throw new SheetStatusException("Нельзя вносить изменения в закрытую ведомость");
         }
     }
 
