@@ -59,11 +59,11 @@ public class ControlSheetJPAEntity {
     @Column(name = "grade_3_from", nullable = false)
     private Integer grade3From;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

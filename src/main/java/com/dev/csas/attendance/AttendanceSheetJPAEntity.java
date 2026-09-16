@@ -33,11 +33,11 @@ public class AttendanceSheetJPAEntity {
     @Column(name = "status", nullable = false, length = 20)
     private AttendanceSheetStatus status = AttendanceSheetStatus.OPEN;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
