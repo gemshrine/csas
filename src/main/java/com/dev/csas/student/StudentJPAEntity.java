@@ -7,10 +7,7 @@ import com.dev.csas.enums.StudentStatusEnum;
 import com.dev.csas.user.UserJPAEntity;
 import com.dev.csas.group.GroupJPAEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -41,6 +38,7 @@ public class StudentJPAEntity {
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;
 
+    @Size(max = 50, message = "Отчество не должно превышать 50 символов")
     @Column(name = "patronymic", length = 50)
     private String patronymic;
 
@@ -50,13 +48,16 @@ public class StudentJPAEntity {
     @Column(name = "record_book_number", unique = true, nullable = false, length = 10)
     private String recordBookNumber;
 
+    @Past(message = "Дата рождения должна быть в прошлом")
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @Email(message = "Некорректный формат email")
+    @Size(max = 100, message = "Email не должен превышать 100 символов")
     @Column(name = "email", length = 100)
     private String email;
 
+    @Size(max = 20, message = "Телефон не должен превышать 20 символов")
     @Column(name = "phone", length = 20)
     private String phone;
 
@@ -69,11 +70,12 @@ public class StudentJPAEntity {
     private EducationFormEnum educationForm;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "study_form")
+    @Column(name = "study_form", length = 20)
     private StudyFormEnum studyForm;
 
-    @Column(name = "enrollment_date")
-    private LocalDate enrollmentDate;
+    @PastOrPresent(message = "Дата поступления не может быть в будущем")
+    @Column(name = "admission_date")
+    private LocalDate admissionDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20)

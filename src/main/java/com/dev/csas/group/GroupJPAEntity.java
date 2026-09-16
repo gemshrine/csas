@@ -53,7 +53,7 @@ public class GroupJPAEntity {
 
     @NotNull(message = "Форма занятий обязательна")
     @Enumerated(EnumType.STRING)
-    @Column(name = "study_form", nullable = false)
+    @Column(name = "study_form", nullable = false, length = 20)
     private StudyFormEnum studyForm;
 
     @ManyToOne(fetch = FetchType.LAZY)

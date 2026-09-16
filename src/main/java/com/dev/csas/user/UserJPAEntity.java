@@ -33,7 +33,7 @@ public class UserJPAEntity {
 
     @NotNull(message = "Роль обязательна")
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, length = 20)
     private RoleEnum role;
 
     @Column(name = "enabled", nullable = false)
