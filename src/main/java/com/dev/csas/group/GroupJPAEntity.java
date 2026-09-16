@@ -2,7 +2,6 @@ package com.dev.csas.group;
 
 import com.dev.csas.enums.EducationFormEnum;
 import com.dev.csas.enums.StudyFormEnum;
-import com.dev.csas.teacher.TeacherJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -53,18 +52,14 @@ public class GroupJPAEntity {
 
     @NotNull(message = "Форма занятий обязательна")
     @Enumerated(EnumType.STRING)
-    @Column(name = "study_form", nullable = false)
+    @Column(name = "study_form", nullable = false, length = 20)
     private StudyFormEnum studyForm;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "curator_id")
-    private TeacherJPAEntity curator;
-
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
