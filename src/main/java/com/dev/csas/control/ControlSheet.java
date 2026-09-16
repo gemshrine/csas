@@ -71,7 +71,9 @@ public class ControlSheet {
         return gradingScale.grade(finalScore(student));
     }
 
-    public void close() {
+    public void close(TeacherID teacher) {
+        validateSeminarTeacher(teacher);
+
         List<StudentID> students = course.students();
         if (!results.keySet().containsAll(students)) {
             throw new IncompleteControlSheetException("Нельзя закрыть ведомость без результатов всех студентов");
@@ -96,6 +98,14 @@ public class ControlSheet {
     private void validateStudent(StudentID student) {
         if (!course.hasStudent(student)) {
             throw new NonExistentStudentException("Студент не относится к курсу: " + student.id());
+        }
+    }
+
+    private void validateSeminarTeacher(TeacherID teacher) {
+        if (!teacher.equals(course.seminarTeacher())) {
+            throw new UnauthorizedTeacherException(
+                    "Операцию может выполнить только преподаватель семинарной части"
+            );
         }
     }
 }
