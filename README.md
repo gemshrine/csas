@@ -66,13 +66,17 @@ Java 21, Spring Boot, Thymeleaf, PostgreSQL, Maven. Тесты на JUnit 5 и A
 ./mvnw test
 ```
 
-Для самого приложения нужна база. Она поднимается в docker:
+Для самого приложения нужна база. Достаточно:
 
 ```
 cp .env.example .env
-docker compose up -d
 ./mvnw spring-boot:run
 ```
+
+Spring Boot через зависимость `spring-boot-docker-compose` сам поднимает
+сервисы из `compose.yaml` (PostgreSQL и pgAdmin). Отдельно вызывать
+`docker compose up -d` не нужно: если контейнеры уже запущены вручную, возможен
+конфликт порта `5432`.
 
 Вместе с PostgreSQL поднимается pgAdmin, он открывается на
 http://localhost:5050 с почтой и паролем из `.env`. Внутри него адрес сервера

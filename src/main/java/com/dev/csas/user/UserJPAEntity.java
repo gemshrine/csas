@@ -33,17 +33,18 @@ public class UserJPAEntity {
 
     @NotNull(message = "Роль обязательна")
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, length = 20)
     private RoleEnum role;
 
+    @Builder.Default
     @Column(name = "enabled", nullable = false)
-    private boolean enabled; // активен ли пользователь
+    private boolean enabled = true; // активен ли пользователь
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
