@@ -36,8 +36,9 @@ public class UserJPAEntity {
     @Column(name = "role", nullable = false, length = 20)
     private RoleEnum role;
 
+    @Builder.Default
     @Column(name = "enabled", nullable = false)
-    private boolean enabled; // активен ли пользователь
+    private boolean enabled = true; // активен ли пользователь
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
