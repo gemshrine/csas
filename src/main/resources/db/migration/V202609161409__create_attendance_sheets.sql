@@ -5,7 +5,7 @@ CREATE TABLE attendance_sheets (
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_attendance_sheets_course_id UNIQUE (course_id),
-    CONSTRAINT ck_attendance_sheets_status CHECK (status IN ('OPEN', 'CLOSED', 'ARCHIVED')),
+    CONSTRAINT ck_attendance_sheets_status CHECK (status IN ('OPEN', 'CLOSED')),
     CONSTRAINT fk_attendance_sheets_course
         FOREIGN KEY (course_id) REFERENCES courses (id)
 );
