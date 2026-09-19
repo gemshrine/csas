@@ -1,5 +1,6 @@
-package com.dev.csas.control;
+package com.dev.csas.control.entity;
 
+import com.dev.csas.control.PassFail;
 import com.dev.csas.student.StudentJPAEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;

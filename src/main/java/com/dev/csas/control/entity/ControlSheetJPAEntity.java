@@ -1,5 +1,6 @@
-package com.dev.csas.control;
+package com.dev.csas.control.entity;
 
+import com.dev.csas.control.ControlSheetStatus;
 import com.dev.csas.course.CourseJPAEntity;
 import com.dev.csas.discipline.ControlFormEnum;
 import jakarta.persistence.*;
