@@ -1,4 +1,4 @@
-/* Базовые настройки */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -12,14 +12,14 @@ body {
     min-height: 100vh;
 }
 
-/* Центральный контейнер */
+
 .page-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
 }
 
-/* Шапка контента */
+
 .content-header {
     display: flex;
     justify-content: space-between;
@@ -40,7 +40,7 @@ body {
     font-size: 15px;
 }
 
-/* Блок профиля в шапке */
+
 .header-right {
     display: flex;
     align-items: center;
@@ -58,7 +58,7 @@ body {
 
 
 
-/* Фильтры */
+
 .filters-section {
     display: flex;
     gap: 16px;
@@ -88,14 +88,14 @@ body {
     cursor: pointer;
 }
 
-/* Сетка карточек (Grid) */
+
 .courses-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 24px;
 }
 
-/* Карточка курса */
+
 .course-card {
     background-color: #fff;
     border-radius: 10px;
@@ -159,7 +159,7 @@ body {
     font-size: 16px;
 }
 
-/* Футер карточки */
+
 .card-footer {
     display: flex;
     justify-content: space-between;
@@ -190,7 +190,7 @@ body {
     background-color: #2b6cb0;
 }
 
-/* Состояние для будущих курсов */
+
 .course-card.disabled {
     opacity: 0.65;
     background-color: #f8fafc;
@@ -202,7 +202,7 @@ body {
     cursor: not-allowed;
 }
 
-/* Адаптивность для мобильных */
+
 @media (max-width: 768px) {
     .content-header {
         flex-direction: column;

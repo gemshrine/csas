@@ -1,4 +1,4 @@
-/* Базовые настройки */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,7 +18,7 @@ body {
     margin: 0 auto;
 }
 
-/* Шапка страницы */
+
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -49,7 +49,7 @@ body {
     font-size: 15px;
 }
 
-/* Кнопки */
+
 .btn {
     padding: 10px 20px;
     border-radius: 6px;
@@ -71,7 +71,7 @@ body {
     box-shadow: 0 6px 16px rgba(56, 161, 105, 0.3);
 }
 
-/* Панель управления (Поиск + Фильтры) */
+
 .controls-panel {
     display: flex;
     justify-content: space-between;
@@ -131,7 +131,7 @@ body {
     border-color: #3182ce;
 }
 
-/* Таблица реестра */
+
 .table-container {
     background-color: #ffffff;
     border-radius: 10px;
@@ -165,7 +165,7 @@ body {
     background-color: #f8fafc;
 }
 
-/* Колонки и элементы строк */
+
 .col-id { width: 15%; }
 .col-fio { width: 45%; }
 .col-group { width: 15%; }
@@ -184,7 +184,7 @@ body {
     color: #1a202c;
 }
 
-/* Бейджи групп */
+
 .group-badge {
     background-color: #ebf8ff;
     color: #2b6cb0;
@@ -194,7 +194,7 @@ body {
     font-size: 13px;
 }
 
-/* Статусы */
+
 .status-indicator {
     display: inline-block;
     padding: 4px 10px;
@@ -213,7 +213,7 @@ body {
     color: #744210;
 }
 
-/* Кнопки действий */
+
 .actions-group {
     display: flex;
     gap: 8px;
@@ -244,7 +244,7 @@ body {
     border-color: #fed7d7;
 }
 
-/* Адаптивность */
+
 @media (max-width: 768px) {
     .page-header {
         flex-direction: column;

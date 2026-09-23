@@ -5,7 +5,9 @@ import com.dev.csas.control.entity.ControlSheetJPAEntity;
 import com.dev.csas.student.StudentJPAEntity;
 
 import java.util.Objects;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ControlSheetEventMapper {
     public ControlSheetEventJPAEntity toEntity(
             ControlSheetEvent event,

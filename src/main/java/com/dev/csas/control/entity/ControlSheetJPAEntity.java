@@ -12,6 +12,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "control_sheets")
@@ -67,4 +69,8 @@ public class ControlSheetJPAEntity {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "controlSheet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ControlResultJPAEntity> results = new ArrayList<>();
 }

@@ -34,6 +34,19 @@ public class ControlSheet {
         this.gradingScale = Objects.requireNonNull(gradingScale);
     }
 
+    static ControlSheet reconstitute(
+            Course course,
+            ControlFormEnum controlForm,
+            GradingScale gradingScale,
+            ControlSheetStatus status,
+            Map<StudentID, ControlResult> results
+    ) {
+        ControlSheet sheet = new ControlSheet(course, controlForm, gradingScale);
+        sheet.status = Objects.requireNonNull(status);
+        sheet.results.putAll(results);
+        return sheet;
+    }
+
     public void enterNumericResult(TeacherID teacher, StudentID student, int score) {
         enterNumericResult(teacher, student, score, null);
     }
@@ -167,6 +180,18 @@ public class ControlSheet {
 
     public ControlSheetStatus status() {
         return status;
+    }
+
+    public ControlFormEnum controlForm() {
+        return controlForm;
+    }
+
+    public GradingScale gradingScale() {
+        return gradingScale;
+    }
+
+    public Map<StudentID, ControlResult> results() {
+        return Map.copyOf(results);
     }
 
     public List<ControlSheetEvent> events() {

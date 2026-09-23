@@ -11,6 +11,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import com.dev.csas.student.StudentJPAEntity;
 
 @Entity
 @Table(
@@ -69,4 +72,22 @@ public class CourseJPAEntity {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("number ASC")
+    @Builder.Default
+    private List<CourseWorkJPAEntity> works = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "course_students",
+            joinColumns = @JoinColumn(name = "course_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"),
+            uniqueConstraints = @UniqueConstraint(
+                    name = "uk_course_students_course_student",
+                    columnNames = {"course_id", "student_id"}
+            )
+    )
+    @Builder.Default
+    private List<StudentJPAEntity> students = new ArrayList<>();
 }
