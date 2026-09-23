@@ -6,6 +6,7 @@ import com.dev.csas.shared.TeacherID;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Course {
 
@@ -24,6 +25,21 @@ public class Course {
         this.studentIDList = List.copyOf(studentIDList);
         this.seminarTeacher = seminarTeacher;
         this.lectureTeacher = lectureTeacher;
+    }
+
+    static Course reconstitute(
+            List<StudentID> students,
+            TeacherID seminarTeacher,
+            TeacherID lectureTeacher,
+            CourseStatus status,
+            List<Work> works,
+            List<Score> scores
+    ) {
+        Course course = new Course(students, seminarTeacher, lectureTeacher);
+        course.status = Objects.requireNonNull(status);
+        course.works.addAll(works);
+        course.scores.addAll(scores);
+        return course;
     }
 
     public long addWork(String title, int maxScore, LocalDate date) {
@@ -189,6 +205,14 @@ public class Course {
 
     public List<StudentID> students() {
         return studentIDList;
+    }
+
+    List<Work> works() {
+        return List.copyOf(works);
+    }
+
+    List<Score> scores() {
+        return List.copyOf(scores);
     }
 
     public boolean hasStudent(StudentID studentID) {

@@ -1,5 +1,6 @@
-package com.dev.csas.control;
+package com.dev.csas.control.entity;
 
+import com.dev.csas.control.ControlSheetStatus;
 import com.dev.csas.course.CourseJPAEntity;
 import com.dev.csas.discipline.ControlFormEnum;
 import jakarta.persistence.*;
@@ -11,6 +12,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "control_sheets")
@@ -66,4 +69,8 @@ public class ControlSheetJPAEntity {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "controlSheet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ControlResultJPAEntity> results = new ArrayList<>();
 }
