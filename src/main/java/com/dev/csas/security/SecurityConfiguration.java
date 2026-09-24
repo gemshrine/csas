@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,6 +31,9 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.GET, "/api/courses").hasAnyRole("TEACHER", "DEAN")
+                        .requestMatchers(HttpMethod.GET, "/api/control-sheets/*").hasAnyRole("TEACHER", "DEAN")
+                        .requestMatchers(HttpMethod.GET, "/api/attendance-sheets/*").hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers("/api/attendance-sheets/*/lectures").hasRole("TEACHER")
                         .requestMatchers("/api/attendance-sheets/*/lectures/*/attendance/*").hasRole("TEACHER")
                         .requestMatchers("/api/attendance-sheets/*/close").hasRole("TEACHER")

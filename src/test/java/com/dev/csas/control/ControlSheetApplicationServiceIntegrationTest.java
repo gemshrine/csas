@@ -2,6 +2,9 @@ package com.dev.csas.control;
 
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
+import com.dev.csas.api.control.ControlSheetDetailsResponse;
+import com.dev.csas.security.ActorAccessDeniedException;
+import com.dev.csas.course.CourseQueryService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Testcontainers
 @SpringBootTest(
@@ -42,6 +47,12 @@ class ControlSheetApplicationServiceIntegrationTest {
 
     @Autowired
     private ControlSheetApplicationService service;
+
+    @Autowired
+    private ControlSheetQueryService queries;
+
+    @Autowired
+    private CourseQueryService courseQueries;
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -81,6 +92,57 @@ class ControlSheetApplicationServiceIntegrationTest {
 
         assertEquals(88, score);
         assertEquals(1, eventCount);
+    }
+
+    @Test
+    void readsControlResultsAndOnlyAllowsAssignedSeminarTeacher() {
+        Fixture fixture = insertFixture();
+
+        ControlSheetDetailsResponse result = queries.getForTeacher(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId())
+        );
+
+        assertEquals(1, result.students().size());
+        assertNull(result.students().getFirst().numericScore());
+        assertNull(result.students().getFirst().passFail());
+        assertThrows(ActorAccessDeniedException.class, () -> queries.getForTeacher(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId() + 100)
+        ));
+
+        service.enterNumericResult(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId()),
+                new StudentID(fixture.studentId()),
+                88,
+                null
+        );
+        assertEquals(88, queries.getForTeacher(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId())
+        ).students().getFirst().numericScore());
+    }
+
+    @Test
+    void listsOnlyAssignedCoursesForTeacherAndAllCoursesForDean() {
+        Fixture fixture = insertFixture();
+
+        var seminarCourses = courseQueries.listForTeacher(new TeacherID(fixture.seminarTeacherId()));
+        var lectureCourses = courseQueries.listForTeacher(new TeacherID(fixture.lectureTeacherId()));
+        var deanCourses = courseQueries.listForDean();
+
+        assertEquals(1, seminarCourses.size());
+        assertEquals(fixture.sheetId(), seminarCourses.getFirst().controlSheetId());
+        assertEquals(true, seminarCourses.getFirst().canReadControlSheet());
+        assertEquals(false, seminarCourses.getFirst().canReadAttendanceSheet());
+        assertEquals(1, lectureCourses.size());
+        assertNull(lectureCourses.getFirst().controlSheetId());
+        assertEquals(false, lectureCourses.getFirst().canReadControlSheet());
+        assertEquals(true, lectureCourses.getFirst().canReadAttendanceSheet());
+        assertEquals(1, deanCourses.size());
+        assertEquals(true, deanCourses.getFirst().canReadControlSheet());
+        assertEquals(true, deanCourses.getFirst().canReadAttendanceSheet());
     }
 
     private Fixture insertFixture() {
@@ -142,7 +204,7 @@ class ControlSheetApplicationServiceIntegrationTest {
                 courseId
         );
 
-        return new Fixture(sheetId, studentId, seminarTeacherId);
+        return new Fixture(sheetId, studentId, seminarTeacherId, lectureTeacherId);
     }
 
     private long insert(String sql, Object... parameters) {
@@ -153,6 +215,6 @@ class ControlSheetApplicationServiceIntegrationTest {
         return id;
     }
 
-    private record Fixture(long sheetId, long studentId, long seminarTeacherId) {
+    private record Fixture(long sheetId, long studentId, long seminarTeacherId, long lectureTeacherId) {
     }
 }

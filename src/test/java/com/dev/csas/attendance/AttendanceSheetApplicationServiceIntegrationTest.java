@@ -4,6 +4,8 @@ import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.LectureID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
+import com.dev.csas.api.attendance.AttendanceSheetDetailsResponse;
+import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.control.UnauthorizedTeacherException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,6 +27,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @Testcontainers
 @SpringBootTest(
@@ -49,6 +52,9 @@ class AttendanceSheetApplicationServiceIntegrationTest {
 
     @Autowired
     private AttendanceSheetApplicationService service;
+
+    @Autowired
+    private AttendanceSheetQueryService queries;
 
     @Autowired
     private AttendanceSheetRepository sheets;
@@ -129,6 +135,32 @@ class AttendanceSheetApplicationServiceIntegrationTest {
                 "SELECT COUNT(*) FROM lectures WHERE attendance_sheet_id = ?",
                 Integer.class,
                 fixture.sheetId()
+        ));
+    }
+
+    @Test
+    void readsRosterLecturesAndUnmarkedAttendanceOnlyForLectureTeacher() {
+        Fixture fixture = insertFixture();
+        LectureID lecture = service.addLecture(
+                fixture.sheetId(),
+                new TeacherID(fixture.lectureTeacherId()),
+                LocalDate.of(2026, 10, 5),
+                "Введение"
+        );
+
+        AttendanceSheetDetailsResponse result = queries.getForTeacher(
+                fixture.sheetId(),
+                new TeacherID(fixture.lectureTeacherId())
+        );
+
+        assertEquals(2, result.students().size());
+        assertEquals(1, result.lectures().size());
+        assertEquals(lecture.id(), result.lectures().getFirst().id());
+        assertEquals(2, result.lectures().getFirst().attendance().size());
+        assertNull(result.lectures().getFirst().attendance().getFirst().status());
+        assertThrows(ActorAccessDeniedException.class, () -> queries.getForTeacher(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId())
         ));
     }
 
