@@ -22,6 +22,23 @@ public class AttendanceSheet {
         this.course = course;
     }
 
+    private AttendanceSheet(Course course, AttendanceSheetStatus status) {
+        this.course = Objects.requireNonNull(course);
+        this.status = Objects.requireNonNull(status);
+    }
+
+    static AttendanceSheet reconstitute(
+            Course course,
+            AttendanceSheetStatus status,
+            List<Lecture> lectures,
+            Map<LectureID, Map<StudentID, AttendanceRecord>> attendances
+    ) {
+        AttendanceSheet sheet = new AttendanceSheet(course, status);
+        sheet.lectures.addAll(lectures);
+        attendances.forEach((lectureID, records) -> sheet.attendances.put(lectureID, new HashMap<>(records)));
+        return sheet;
+    }
+
     public void addLecture(TeacherID teacherID, LectureID lectureID, LocalDate date, String title) {
         validateOpen();
         validateTeacher(teacherID);
@@ -74,6 +91,16 @@ public class AttendanceSheet {
 
     public AttendanceSheetStatus status() {
         return status;
+    }
+
+    public List<Lecture> lectures() {
+        return List.copyOf(lectures);
+    }
+
+    public Map<LectureID, Map<StudentID, AttendanceRecord>> attendances() {
+        Map<LectureID, Map<StudentID, AttendanceRecord>> result = new HashMap<>();
+        attendances.forEach((lectureID, records) -> result.put(lectureID, Map.copyOf(records)));
+        return Map.copyOf(result);
     }
 
     public Map<StudentID, AttendanceRecord> getAttendances(LectureID lectureID) {
