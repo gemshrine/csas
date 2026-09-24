@@ -1,6 +1,7 @@
 package com.dev.csas.api.control;
 
 import com.dev.csas.control.ControlSheetApplicationService;
+import com.dev.csas.control.ControlSheetQueryService;
 import com.dev.csas.control.PassFail;
 import com.dev.csas.security.CurrentActorResolver;
 import com.dev.csas.shared.StudentID;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,11 +24,30 @@ import jakarta.validation.Valid;
 public class ControlSheetController {
 
     private final ControlSheetApplicationService service;
+    private final ControlSheetQueryService queryService;
     private final CurrentActorResolver actors;
 
-    public ControlSheetController(ControlSheetApplicationService service, CurrentActorResolver actors) {
+    public ControlSheetController(
+            ControlSheetApplicationService service,
+            ControlSheetQueryService queryService,
+            CurrentActorResolver actors
+    ) {
         this.service = service;
+        this.queryService = queryService;
         this.actors = actors;
+    }
+
+    @GetMapping
+    public ResponseEntity<com.dev.csas.api.control.ControlSheetDetailsResponse> get(
+            @PathVariable long sheetId,
+            Authentication authentication
+    ) {
+        if (authentication.getAuthorities().stream().anyMatch(authority ->
+                authority.getAuthority().equals("ROLE_DEAN"))) {
+            actors.dean(authentication);
+            return ResponseEntity.ok(queryService.getForDean(sheetId));
+        }
+        return ResponseEntity.ok(queryService.getForTeacher(sheetId, actors.teacher(authentication)));
     }
 
     @PutMapping("/results/{studentId}/numeric")
