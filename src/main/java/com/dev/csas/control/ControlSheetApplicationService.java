@@ -77,7 +77,7 @@ public class ControlSheetApplicationService {
 
     private void mutate(long sheetId, Consumer<ControlSheet> operation) {
         ControlSheetJPAEntity entity = sheets.findById(sheetId)
-                .orElseThrow(() -> new ControlSheetException("Контрольная ведомость не найдена: " + sheetId));
+                .orElseThrow(() -> new ControlSheetNotFoundException("Контрольная ведомость не найдена: " + sheetId));
 
         ControlSheet sheet = mapper.toDomain(entity);
         operation.accept(sheet);
