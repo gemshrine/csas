@@ -8,6 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "attendance_sheets")
@@ -40,4 +42,9 @@ public class AttendanceSheetJPAEntity {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "attendanceSheet", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("lectureDate ASC, id ASC")
+    @Builder.Default
+    private List<LectureJPAEntity> lectures = new ArrayList<>();
 }
