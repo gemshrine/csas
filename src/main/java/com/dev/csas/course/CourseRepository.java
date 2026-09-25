@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface CourseRepository extends JpaRepository<CourseJPAEntity, Long> {
 
-    // === Методы из main (для выборки курсов с подгрузкой связей) ===
-
     @EntityGraph(attributePaths = {"discipline", "group", "semester"})
     List<CourseJPAEntity> findAllBySeminarTeacher_IdOrLectureTeacher_IdOrderByIdAsc(
             Long seminarTeacherId,
@@ -18,7 +16,6 @@ public interface CourseRepository extends JpaRepository<CourseJPAEntity, Long> {
     @EntityGraph(attributePaths = {"discipline", "group", "semester"})
     List<CourseJPAEntity> findAllByOrderByIdAsc();
 
-    // === Методы из твоей ветки (для проверок перед удалением/созданием) ===
 
     boolean existsByGroup_Id(Long groupId);
 
