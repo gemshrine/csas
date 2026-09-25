@@ -1,4 +1,4 @@
-/* Базовые настройки */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -14,11 +14,11 @@ body {
 }
 
 .page-container {
-    max-width: 700px; /* Сузили контейнер, чтобы список ввода не растягивался и был перед глазами */
+    max-width: 700px;
     margin: 0 auto;
 }
 
-/* Навигация */
+
 .navigation-back {
     margin-bottom: 20px;
 }
@@ -35,7 +35,7 @@ body {
     text-decoration: underline;
 }
 
-/* Шапка работы */
+
 .work-header {
     background-color: #ffffff;
     padding: 24px;
@@ -70,7 +70,7 @@ body {
     color: #2b6cb0;
 }
 
-/* Контейнер списка */
+
 .students-list-container {
     background-color: #ffffff;
     border-radius: 10px;
@@ -80,7 +80,7 @@ body {
     margin-bottom: 24px;
 }
 
-/* Шапка списка */
+
 .list-header {
     background-color: #f8fafc;
     padding: 14px 24px;
@@ -101,7 +101,7 @@ body {
     text-align: center;
 }
 
-/* Строка студента */
+
 .student-row {
     padding: 14px 24px;
     display: flex;
@@ -123,10 +123,10 @@ body {
     flex: 1;
     font-weight: 500;
     color: #1a202c;
-    cursor: pointer; /* Клик по имени сфокусирует инпут */
+    cursor: pointer;
 }
 
-/* Группа ввода баллов */
+
 .input-group {
     display: flex;
     align-items: center;
@@ -145,10 +145,10 @@ body {
     text-align: center;
     outline: none;
     transition: all 0.2s ease;
-    -moz-appearance: textfield; /* Убираем стрелочки в Firefox */
+    -moz-appearance: textfield;
 }
 
-/* Убираем стрелочки инпута "number" в Chrome/Safari/Edge */
+
 .score-input::-webkit-outer-spin-button,
 .score-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -167,7 +167,7 @@ body {
     font-weight: 500;
 }
 
-/* Нижняя панель с кнопкой сохранения */
+
 .form-actions {
     text-align: right;
 }

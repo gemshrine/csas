@@ -1,4 +1,4 @@
-/* Базовые настройки */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,7 +18,7 @@ body {
     margin: 0 auto;
 }
 
-/* Шапка курса */
+
 .course-header {
     display: flex;
     justify-content: space-between;
@@ -65,7 +65,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Кнопки действий */
+
 .action-buttons {
     display: flex;
     gap: 12px;
@@ -101,13 +101,13 @@ body {
     color: #2d3748;
 }
 
-/* Таблица успеваемости */
+
 .table-container {
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
     border: 1px solid #edf2f7;
-    overflow-x: auto; /* Скролл для мобильных экранов */
+    overflow-x: auto;
 }
 
 .grades-table {
@@ -117,7 +117,7 @@ body {
     font-size: 15px;
 }
 
-/* Стили заголовков */
+
 .grades-table th {
     background-color: #f8fafc;
     color: #4a5568;
@@ -134,7 +134,7 @@ body {
     border-bottom: 2px solid #e2e8f0;
 }
 
-/* Ширина и выравнивание колонок */
+
 .col-fio {
     width: 35%;
 }
@@ -149,7 +149,7 @@ body {
     border-bottom: 1px solid #edf2f7;
 }
 
-/* Центрирование баллов для лучшей читаемости */
+
 .grades-table th:not(.col-fio),
 .grades-table td:not(.student-name) {
     text-align: center;
@@ -159,7 +159,7 @@ body {
     color: #2d3748;
 }
 
-/* Колонка рейтинга */
+
 .col-rating {
     width: 15%;
 }
@@ -169,19 +169,19 @@ body {
     color: #2b6cb0;
 }
 
-/* Подсветка отличников */
+
 .rating-value.high-score {
     color: #2f855a;
     background-color: #f0fff4;
     border-radius: 4px;
 }
 
-/* Эффект наведения на строку таблицы */
+
 .grades-table tbody tr:hover {
     background-color: #f8fafc;
 }
 
-/* Адаптивность */
+
 @media (max-width: 768px) {
     .course-header {
         flex-direction: column;

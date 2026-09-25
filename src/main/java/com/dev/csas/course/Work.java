@@ -20,6 +20,10 @@ public class Work {
         return number;
     }
 
+    String getTitle() {
+        return title;
+    }
+
     int getMaxScore() {
         return maxScore;
     }

@@ -10,12 +10,12 @@
 
 <div class="page-container">
 
-    <!-- Ссылка Назад -->
+
     <div class="navigation-back">
         <a href="course-detail.html" class="back-link">← Вернуться к журналу курса</a>
     </div>
 
-    <!-- Информация о работе -->
+
     <header class="work-header">
         <div class="work-info">
             <span class="course-context">Базы данных • Группа ИСТ-21</span>
@@ -24,26 +24,26 @@
         </div>
     </header>
 
-    <!-- Форма для отправки оценок на бэкенд -->
+
     <form action="/save-grades" method="POST">
 
-        <!-- Скрытое поле для ID работы, пригодится для Spring -->
+
         <input type="hidden" name="workId" value="101">
 
-        <!-- Список студентов -->
+
         <div class="students-list-container">
 
-            <!-- Заголовки списка -->
+
             <div class="list-header">
                 <span class="hdr-fio">ФИО Студента</span>
                 <span class="hdr-score">Балл</span>
             </div>
 
-            <!-- Строка студента 1 -->
+
             <div class="student-row">
                 <label for="student-1" class="student-name">Иванов А.А.</label>
                 <div class="input-group">
-                    <!-- min/max не дадут ввести оценку выше лимита -->
+
                     <input
                             type="number"
                             id="student-1"
@@ -59,7 +59,7 @@
                 </div>
             </div>
 
-            <!-- Строка студента 2 -->
+
             <div class="student-row">
                 <label for="student-2" class="student-name">Петрова М.И.</label>
                 <div class="input-group">
@@ -78,7 +78,7 @@
                 </div>
             </div>
 
-            <!-- Строка студента 3 (пример без оценки) -->
+
             <div class="student-row">
                 <label for="student-3" class="student-name">Сидоров К.В.</label>
                 <div class="input-group">
@@ -98,7 +98,7 @@
 
         </div>
 
-        <!-- Единая кнопка сохранения изменений -->
+
         <div class="form-actions">
             <button type="submit" class="save-btn">💾 Сохранить изменения</button>
         </div>

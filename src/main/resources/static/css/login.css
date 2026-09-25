@@ -1,4 +1,4 @@
-/* Общие сбросы и шрифты */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -15,7 +15,7 @@ body {
     color: #333;
 }
 
-/* Контейнер формы */
+
 .login-container {
     background-color: #ffffff;
     padding: 40px;
@@ -26,7 +26,7 @@ body {
     text-align: center;
 }
 
-/* Логотип / Иконка системы */
+
 .logo-area {
     margin-bottom: 24px;
 }
@@ -50,7 +50,7 @@ body {
     margin-bottom: 28px;
 }
 
-/* Элементы формы */
+
 .form-group {
     margin-bottom: 20px;
     text-align: left;
@@ -83,7 +83,7 @@ body {
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
-/* Дополнительные опции (Запомнить / Забыли пароль) */
+
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -115,7 +115,7 @@ body {
     text-decoration: underline;
 }
 
-/* Кнопка отправки */
+
 .submit-btn {
     width: 100%;
     padding: 12px;
@@ -137,7 +137,7 @@ body {
     background-color: #2c5282;
 }
 
-/* Подвал карточки */
+
 .login-footer {
     margin-top: 24px;
     font-size: 13px;

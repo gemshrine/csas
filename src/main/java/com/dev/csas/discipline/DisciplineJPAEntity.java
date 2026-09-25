@@ -45,7 +45,6 @@ public class DisciplineJPAEntity {
     @Column(name = "lab_hours", nullable = false)
     private Integer labHours;
 
-    // Форма контроля: EXAM, DIFF_CREDIT, CREDIT
     @NotNull(message = "Форма контроля обязательна")
     @Enumerated(EnumType.STRING)
     @Column(name = "control_form", nullable = false, length = 20)

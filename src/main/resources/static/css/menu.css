@@ -5,10 +5,10 @@
 
 
 
-/* Настройки боковой панели */
+
 .sidebar {
     width: 260px;
-    background-color: #1a202c; /* Темный графитовый цвет */
+    background-color: #1a202c;
     color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -19,7 +19,7 @@
     box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Логотип */
+
 .sidebar-brand {
     padding: 24px;
     display: flex;
@@ -38,7 +38,7 @@
     letter-spacing: 0.5px;
 }
 
-/* Навигационные ссылки */
+
 .sidebar-menu {
     flex: 1;
     padding: 16px;
@@ -48,7 +48,7 @@
     overflow-y: auto;
 }
 
-/* Стили заголовков категорий */
+
 .menu-category {
     font-size: 11px;
     text-transform: uppercase;
@@ -69,7 +69,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    color: #a0aec0; /* Сероватый цвет для неактивных пунктов */
+    color: #a0aec0;
     text-decoration: none;
     border-radius: 6px;
     font-size: 14px;
@@ -77,14 +77,14 @@
     transition: all 0.2s ease;
 }
 
-/* Эффект наведения и активное состояние */
+
 .menu-item:hover {
     background-color: #2d3748;
     color: #ffffff;
 }
 
 .menu-item.active {
-    background-color: #3182ce; /* Фирменный синий цвет */
+    background-color: #3182ce;
     color: #ffffff;
     font-weight: 600;
 }
@@ -96,14 +96,14 @@
     text-align: center;
 }
 
-/* Блок пользователя в подвале */
+
 .sidebar-user {
     padding: 16px;
     border-top: 1px solid #2d3748;
     display: flex;
     align-items: center;
     gap: 12px;
-    background-color: #141923; /* Чуть темнее основного фона */
+    background-color: #141923;
 }
 
 .user-avatar {

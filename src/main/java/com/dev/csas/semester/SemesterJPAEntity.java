@@ -25,7 +25,7 @@ public class SemesterJPAEntity {
     @NotBlank(message = "Название семестра обязательно")
     @Size(max = 100, message = "Название семестра не должно превышать 100 символов")
     @Column(name = "name", nullable = false, unique = true, length = 100)
-    private String name; // например, "Осенний семестр 2025/2026"
+    private String name;
 
     @NotNull(message = "Дата начала обязательна")
     @Column(name = "start_date", nullable = false)

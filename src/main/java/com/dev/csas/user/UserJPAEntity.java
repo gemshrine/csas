@@ -29,7 +29,7 @@ public class UserJPAEntity {
     @NotBlank(message = "Пароль обязателен")
     @Size(min = 8, max = 100, message = "Пароль должен содержать от 8 до 100 символов")
     @Column(name = "password", nullable = false, length = 100)
-    private String password; // хранится в виде BCrypt-хеша
+    private String password;
 
     @NotNull(message = "Роль обязательна")
     @Enumerated(EnumType.STRING)
@@ -38,7 +38,7 @@ public class UserJPAEntity {
 
     @Builder.Default
     @Column(name = "enabled", nullable = false)
-    private boolean enabled = true; // активен ли пользователь
+    private boolean enabled = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
