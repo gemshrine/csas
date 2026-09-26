@@ -9,6 +9,13 @@ import com.dev.csas.control.IncompleteControlSheetException;
 import com.dev.csas.control.InvalidControlResultException;
 import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.NonExistentStudentException;
+import com.dev.csas.course.CourseNotFoundException;
+import com.dev.csas.course.WorkNotFoundException;
+import com.dev.csas.course.InvalidWorkMaxScoreException;
+import com.dev.csas.course.InvalidWorkDateException;
+import com.dev.csas.course.InvalidScoreValueException;
+import com.dev.csas.course.CourseWithoutWorksException;
+import com.dev.csas.course.CourseCompletedException;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -40,12 +47,13 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler({AttendanceSheetNotFoundException.class, LectureNotFoundException.class,
             NonExistentStudentException.class, com.dev.csas.control.ControlSheetNotFoundException.class,
-            CatalogNotFoundException.class})
+            CatalogNotFoundException.class, CourseNotFoundException.class, WorkNotFoundException.class})
     public ResponseEntity<ApiErrorResponse> notFound(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
-    @ExceptionHandler({CatalogConflictException.class, DataIntegrityViolationException.class})
+    @ExceptionHandler({CatalogConflictException.class, DataIntegrityViolationException.class,
+            CourseWithoutWorksException.class, CourseCompletedException.class})
     public ResponseEntity<ApiErrorResponse> catalogConflict(RuntimeException exception, HttpServletRequest request) {
         String message = exception instanceof DataIntegrityViolationException
                 ? "Нельзя выполнить операцию: нарушено ограничение уникальности или связи"
@@ -72,7 +80,8 @@ public class ApiExceptionHandler {
         return error(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
-    @ExceptionHandler({InvalidControlResultException.class})
+    @ExceptionHandler({InvalidControlResultException.class, InvalidWorkMaxScoreException.class,
+            InvalidWorkDateException.class, InvalidScoreValueException.class})
     public ResponseEntity<ApiErrorResponse> invalidResult(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.UNPROCESSABLE_CONTENT, exception.getMessage(), request);
     }
