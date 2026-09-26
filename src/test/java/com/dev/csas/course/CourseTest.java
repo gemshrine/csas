@@ -99,6 +99,16 @@ public class CourseTest {
     }
 
     @Test
+    void cannotLowerWorkMaximumBelowAnExistingScore() {
+        Course course = new Course(List.of(student));
+        long workNum = addWork(course, "Лабораторная 1", 20);
+        course.score(workNum, student, 15);
+
+        assertThatThrownBy(() -> course.updateWorkMaxScore(workNum, 10))
+                .isInstanceOf(InvalidWorkMaxScoreException.class);
+    }
+
+    @Test
     void unableToSetScoreWithValueGreaterThenWorkMaxScore() {
         Course course = new Course(List.of(student));
         long workNum = addWork(course, "Лабораторная 1", 20);

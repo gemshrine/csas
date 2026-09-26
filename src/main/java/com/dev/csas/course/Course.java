@@ -98,6 +98,12 @@ public class Course {
         validateWorkMaxScore(newMax);
 
         Work work = findWork(workNumber);
+        boolean hasScoreAboveNewMax = scores.stream()
+                .filter(score -> score.getWorkNumber() == workNumber)
+                .anyMatch(score -> score.getScore() > newMax);
+        if (hasScoreAboveNewMax) {
+            throw new InvalidWorkMaxScoreException("Максимальный балл не может быть меньше уже выставленной оценки");
+        }
         work.updateMaxScore(newMax);
     }
 
@@ -221,7 +227,7 @@ public class Course {
 
     private void validateInProgress() {
         if (status != CourseStatus.IN_PROGRESS) {
-            throw new IllegalStateException("Завершённый курс нельзя изменять");
+            throw new CourseCompletedException("Завершённый курс нельзя изменять");
         }
     }
 }
