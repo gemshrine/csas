@@ -2,6 +2,7 @@ package com.dev.csas.student;
 
 import com.dev.csas.attendance.LectureAttendanceRepository;
 import com.dev.csas.control.ControlResultRepository;
+import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -21,6 +22,7 @@ public class StudentService {
     private final GroupRepository groupRepository;
     private final ControlResultRepository controlResultRepository;
     private final LectureAttendanceRepository lectureAttendanceRepository;
+    private final CourseRepository courseRepository;
 
     @Transactional(readOnly = true)
     public List<StudentResponse> findAll() {
@@ -78,6 +80,11 @@ public class StudentService {
     @Transactional
     public void delete(Long id) {
         getStudent(id);
+        if (courseRepository.existsByStudents_Id(id)) {
+            throw new CatalogConflictException(
+                    "Нельзя удалить студента: он зачислен на курс"
+            );
+        }
         if (controlResultRepository.existsByStudent_Id(id)
                 || lectureAttendanceRepository.existsByStudent_Id(id)) {
             throw new CatalogConflictException(

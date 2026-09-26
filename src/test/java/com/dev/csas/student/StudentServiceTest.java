@@ -2,6 +2,7 @@ package com.dev.csas.student;
 
 import com.dev.csas.attendance.LectureAttendanceRepository;
 import com.dev.csas.control.ControlResultRepository;
+import com.dev.csas.course.CourseRepository;
 import com.dev.csas.enums.StudentStatusEnum;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.error.CatalogConflictException;
@@ -35,6 +36,8 @@ class StudentServiceTest {
     private ControlResultRepository controlResultRepository;
     @Mock
     private LectureAttendanceRepository lectureAttendanceRepository;
+    @Mock
+    private CourseRepository courseRepository;
     @InjectMocks
     private StudentService studentService;
 
@@ -101,8 +104,20 @@ class StudentServiceTest {
     }
 
     @Test
+    void deleteThrowsWhenEnrolledOnCourse() {
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student(1L)));
+        when(courseRepository.existsByStudents_Id(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> studentService.delete(1L))
+                .isInstanceOf(CatalogConflictException.class)
+                .hasMessage("Нельзя удалить студента: он зачислен на курс");
+        verify(studentRepository, never()).deleteById(any());
+    }
+
+    @Test
     void deleteThrowsWhenControlResultsExist() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student(1L)));
+        when(courseRepository.existsByStudents_Id(1L)).thenReturn(false);
         when(controlResultRepository.existsByStudent_Id(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> studentService.delete(1L))
@@ -114,6 +129,7 @@ class StudentServiceTest {
     @Test
     void deleteThrowsWhenAttendanceExists() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student(1L)));
+        when(courseRepository.existsByStudents_Id(1L)).thenReturn(false);
         when(controlResultRepository.existsByStudent_Id(1L)).thenReturn(false);
         when(lectureAttendanceRepository.existsByStudent_Id(1L)).thenReturn(true);
 
@@ -124,6 +140,7 @@ class StudentServiceTest {
     @Test
     void deleteRemovesStudentWithoutLinks() {
         when(studentRepository.findById(1L)).thenReturn(Optional.of(student(1L)));
+        when(courseRepository.existsByStudents_Id(1L)).thenReturn(false);
         when(controlResultRepository.existsByStudent_Id(1L)).thenReturn(false);
         when(lectureAttendanceRepository.existsByStudent_Id(1L)).thenReturn(false);
 

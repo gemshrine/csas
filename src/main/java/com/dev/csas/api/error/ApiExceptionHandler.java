@@ -9,8 +9,12 @@ import com.dev.csas.control.IncompleteControlSheetException;
 import com.dev.csas.control.InvalidControlResultException;
 import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.NonExistentStudentException;
+import com.dev.csas.error.CatalogBadRequestException;
+import com.dev.csas.error.CatalogConflictException;
+import com.dev.csas.error.CatalogNotFoundException;
 import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.shared.SheetStatusException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -24,13 +28,37 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice(basePackages = "com.dev.csas.api")
+@RestControllerAdvice(basePackages = {
+        "com.dev.csas.api",
+        "com.dev.csas.group",
+        "com.dev.csas.student",
+        "com.dev.csas.teacher",
+        "com.dev.csas.discipline",
+        "com.dev.csas.semester"
+})
 public class ApiExceptionHandler {
 
     @ExceptionHandler({AttendanceSheetNotFoundException.class, LectureNotFoundException.class,
-            NonExistentStudentException.class, com.dev.csas.control.ControlSheetNotFoundException.class})
+            NonExistentStudentException.class, com.dev.csas.control.ControlSheetNotFoundException.class,
+            CatalogNotFoundException.class})
     public ResponseEntity<ApiErrorResponse> notFound(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.NOT_FOUND, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler({CatalogConflictException.class, DataIntegrityViolationException.class})
+    public ResponseEntity<ApiErrorResponse> catalogConflict(RuntimeException exception, HttpServletRequest request) {
+        String message = exception instanceof DataIntegrityViolationException
+                ? "Нельзя выполнить операцию: нарушено ограничение уникальности или связи"
+                : exception.getMessage();
+        return error(HttpStatus.CONFLICT, message, request);
+    }
+
+    @ExceptionHandler(CatalogBadRequestException.class)
+    public ResponseEntity<ApiErrorResponse> catalogBadRequest(
+            CatalogBadRequestException exception,
+            HttpServletRequest request
+    ) {
+        return error(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
     }
 
     @ExceptionHandler({ActorAccessDeniedException.class, UnauthorizedTeacherException.class})

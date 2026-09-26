@@ -24,4 +24,6 @@ public interface CourseRepository extends JpaRepository<CourseJPAEntity, Long> {
     boolean existsBySemester_Id(Long semesterId);
 
     boolean existsBySeminarTeacher_IdOrLectureTeacher_Id(Long seminarTeacherId, Long lectureTeacherId);
+
+    boolean existsByStudents_Id(Long studentId);
 }
