@@ -2,6 +2,7 @@ package com.dev.csas.course;
 
 import com.dev.csas.api.course.CourseWorkRequest;
 import com.dev.csas.security.ActorAccessDeniedException;
+import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,9 @@ class CourseApplicationServiceIntegrationTest {
 
     @Autowired
     private CourseApplicationService service;
+
+    @Autowired
+    private StudentCourseQueryService studentCourses;
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -87,6 +91,32 @@ class CourseApplicationServiceIntegrationTest {
         assertEquals(CourseStatus.COMPLETED, service.getForTeacher(fixture.courseId(), teacher).status());
     }
 
+    @Test
+    void studentReadsOnlyTheirOwnScoresAndComputedRating() {
+        Fixture fixture = insertFixture();
+        long anotherStudentId = insert("INSERT INTO students (first_name, last_name, record_book_number, group_id) " +
+                "VALUES ('Пётр', 'Иванов', 'API00002', ?) RETURNING id", fixture.groupId());
+        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)",
+                fixture.courseId(), anotherStudentId);
+        long workId = insert("INSERT INTO course_works (course_id, number, title, max_score, work_date) " +
+                "VALUES (?, 1, 'Лабораторная', 20, ?) RETURNING id",
+                fixture.courseId(), Date.valueOf("2026-10-01"));
+        jdbc.update("INSERT INTO course_scores (work_id, student_id, score) VALUES (?, ?, ?)",
+                workId, fixture.studentId(), 17);
+        jdbc.update("INSERT INTO course_scores (work_id, student_id, score) VALUES (?, ?, ?)",
+                workId, anotherStudentId, 7);
+
+        var detail = studentCourses.get(new StudentID(fixture.studentId()), fixture.courseId());
+        var summary = studentCourses.list(new StudentID(fixture.studentId())).getFirst();
+
+        assertEquals(85.0, detail.rating());
+        assertEquals(17, detail.works().getFirst().score());
+        assertEquals(85.0, summary.rating());
+        assertEquals(1, studentCourses.list(new StudentID(fixture.studentId())).size());
+        assertThrows(CourseNotFoundException.class,
+                () -> studentCourses.get(new StudentID(anotherStudentId + 1000), fixture.courseId()));
+    }
+
     private Fixture insertFixture() {
         long groupId = insert("INSERT INTO groups (name, year_of_admission, specialty, course, education_form, study_form) " +
                 "VALUES (?, 2024, ?, 3, 'BUDGET', 'FULL_TIME') RETURNING id", "API-TEST", "Информатика");
@@ -104,7 +134,7 @@ class CourseApplicationServiceIntegrationTest {
                         "lecture_teacher_id, status) VALUES (?, ?, ?, ?, ?, 'IN_PROGRESS') RETURNING id",
                 disciplineId, groupId, semesterId, seminarTeacherId, lectureTeacherId);
         jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", courseId, studentId);
-        return new Fixture(courseId, studentId, seminarTeacherId, lectureTeacherId);
+        return new Fixture(courseId, studentId, seminarTeacherId, lectureTeacherId, groupId);
     }
 
     private long insert(String sql, Object... parameters) {
@@ -113,6 +143,6 @@ class CourseApplicationServiceIntegrationTest {
         return id;
     }
 
-    private record Fixture(long courseId, long studentId, long seminarTeacherId, long lectureTeacherId) {
+    private record Fixture(long courseId, long studentId, long seminarTeacherId, long lectureTeacherId, long groupId) {
     }
 }

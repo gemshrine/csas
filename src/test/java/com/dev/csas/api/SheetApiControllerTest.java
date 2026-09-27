@@ -5,6 +5,9 @@ import com.dev.csas.api.control.ControlSheetController;
 import com.dev.csas.api.course.CourseListController;
 import com.dev.csas.api.course.CourseController;
 import com.dev.csas.api.course.CourseDetailsResponse;
+import com.dev.csas.api.course.StudentCourseController;
+import com.dev.csas.api.course.StudentCourseDetailsResponse;
+import com.dev.csas.api.course.StudentCourseSummaryResponse;
 import com.dev.csas.api.control.ControlSheetDetailsResponse;
 import com.dev.csas.api.attendance.AttendanceSheetDetailsResponse;
 import com.dev.csas.attendance.AttendanceSheetStatus;
@@ -17,6 +20,7 @@ import com.dev.csas.control.ControlSheetQueryService;
 import com.dev.csas.attendance.AttendanceSheetQueryService;
 import com.dev.csas.course.CourseQueryService;
 import com.dev.csas.course.CourseApplicationService;
+import com.dev.csas.course.StudentCourseQueryService;
 import com.dev.csas.security.CurrentActorResolver;
 import com.dev.csas.security.SecurityConfiguration;
 import com.dev.csas.shared.DeanID;
@@ -45,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {AttendanceSheetController.class, ControlSheetController.class,
-        CourseListController.class, CourseController.class})
+        CourseListController.class, CourseController.class, StudentCourseController.class})
 @Import({SecurityConfiguration.class, ApiExceptionHandler.class})
 class SheetApiControllerTest {
 
@@ -69,6 +73,9 @@ class SheetApiControllerTest {
 
     @MockitoBean
     private CourseApplicationService courseApplication;
+
+    @MockitoBean
+    private StudentCourseQueryService studentCourseQueries;
 
     @MockitoBean
     private CurrentActorResolver actors;
@@ -141,6 +148,33 @@ class SheetApiControllerTest {
         mvc.perform(post("/api/courses/3/works")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Работа\",\"maxScore\":20,\"date\":\"2026-10-01\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403));
+    }
+
+    @Test
+    @WithMockUser(username = "student", roles = "STUDENT")
+    void getsOwnCoursePerformanceUsingCurrentStudent() throws Exception {
+        when(actors.student(any())).thenReturn(new StudentID(21));
+        when(studentCourseQueries.get(new StudentID(21), 3L)).thenReturn(
+                new StudentCourseDetailsResponse(3, "Базы данных", "ИВТ-301", "Осень 2026",
+                        com.dev.csas.course.CourseStatus.IN_PROGRESS, 90.0,
+                        java.util.List.of(new StudentCourseDetailsResponse.WorkResult(1, "Лабораторная", 20,
+                                java.time.LocalDate.parse("2026-10-01"), 18))));
+
+        mvc.perform(get("/api/me/courses/3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating").value(90.0))
+                .andExpect(jsonPath("$.works[0].score").value(18))
+                .andExpect(jsonPath("$.studentId").doesNotExist());
+
+        verify(studentCourseQueries).get(new StudentID(21), 3L);
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void deniesTeacherFromStudentPersonalPerformanceApi() throws Exception {
+        mvc.perform(get("/api/me/courses"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403));
     }

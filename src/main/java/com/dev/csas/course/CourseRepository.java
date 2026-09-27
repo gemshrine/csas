@@ -16,6 +16,9 @@ public interface CourseRepository extends JpaRepository<CourseJPAEntity, Long> {
     @EntityGraph(attributePaths = {"discipline", "group", "semester"})
     List<CourseJPAEntity> findAllByOrderByIdAsc();
 
+    @EntityGraph(attributePaths = {"discipline", "group", "semester"})
+    List<CourseJPAEntity> findAllByStudents_IdOrderByIdAsc(Long studentId);
+
 
     boolean existsByGroup_Id(Long groupId);
 
