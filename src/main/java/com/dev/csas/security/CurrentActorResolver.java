@@ -2,6 +2,8 @@ package com.dev.csas.security;
 
 import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.TeacherID;
+import com.dev.csas.shared.StudentID;
+import com.dev.csas.student.StudentRepository;
 import com.dev.csas.teacher.TeacherRepository;
 import com.dev.csas.user.RoleEnum;
 import com.dev.csas.user.UserJPAEntity;
@@ -14,10 +16,12 @@ public class CurrentActorResolver {
 
     private final UserRepository users;
     private final TeacherRepository teachers;
+    private final StudentRepository students;
 
-    public CurrentActorResolver(UserRepository users, TeacherRepository teachers) {
+    public CurrentActorResolver(UserRepository users, TeacherRepository teachers, StudentRepository students) {
         this.users = users;
         this.teachers = teachers;
+        this.students = students;
     }
 
     public TeacherID teacher(Authentication authentication) {
@@ -38,6 +42,18 @@ public class CurrentActorResolver {
             throw new ActorAccessDeniedException("Операция доступна только деканату");
         }
         return new DeanID(user.getId());
+    }
+
+    public StudentID student(Authentication authentication) {
+        UserJPAEntity user = findCurrentUser(authentication);
+        if (user.getRole() != RoleEnum.STUDENT) {
+            throw new ActorAccessDeniedException("Операция доступна только студенту");
+        }
+        return students.findByUser_Id(user.getId())
+                .map(student -> new StudentID(student.getId()))
+                .orElseThrow(() -> new ActorAccessDeniedException(
+                        "Для пользователя не найдена учётная запись студента"
+                ));
     }
 
     private UserJPAEntity findCurrentUser(Authentication authentication) {

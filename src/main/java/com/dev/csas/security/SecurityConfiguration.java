@@ -38,6 +38,7 @@ public class SecurityConfiguration {
                                 "/api/disciplines/**",
                                 "/api/semesters/**"
                         ).hasRole("DEAN")
+                        .requestMatchers("/api/me/courses", "/api/me/courses/*").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/courses").hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers(HttpMethod.GET, "/api/courses/*").hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers("/api/courses/*/works", "/api/courses/*/works/*",

@@ -2,6 +2,9 @@ package com.dev.csas.security;
 
 import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.TeacherID;
+import com.dev.csas.shared.StudentID;
+import com.dev.csas.student.StudentJPAEntity;
+import com.dev.csas.student.StudentRepository;
 import com.dev.csas.teacher.TeacherJPAEntity;
 import com.dev.csas.teacher.TeacherRepository;
 import com.dev.csas.user.RoleEnum;
@@ -22,7 +25,8 @@ class CurrentActorResolverTest {
 
     private final UserRepository users = mock(UserRepository.class);
     private final TeacherRepository teachers = mock(TeacherRepository.class);
-    private final CurrentActorResolver resolver = new CurrentActorResolver(users, teachers);
+    private final StudentRepository students = mock(StudentRepository.class);
+    private final CurrentActorResolver resolver = new CurrentActorResolver(users, teachers, students);
     private final Authentication authentication = mock(Authentication.class);
 
     @BeforeEach
@@ -48,6 +52,17 @@ class CurrentActorResolverTest {
         when(users.findByUsername("dean")).thenReturn(Optional.of(user));
 
         assertThat(resolver.dean(authentication)).isEqualTo(new DeanID(21));
+    }
+
+    @Test
+    void resolvesStudentProfileIdFromAuthenticatedUsername() {
+        UserJPAEntity user = user(32, RoleEnum.STUDENT);
+        StudentJPAEntity student = StudentJPAEntity.builder().id(81L).user(user).build();
+        when(authentication.getName()).thenReturn("student");
+        when(users.findByUsername("student")).thenReturn(Optional.of(user));
+        when(students.findByUser_Id(32L)).thenReturn(Optional.of(student));
+
+        assertThat(resolver.student(authentication)).isEqualTo(new StudentID(81));
     }
 
     @Test
