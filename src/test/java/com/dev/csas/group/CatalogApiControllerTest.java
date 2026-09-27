@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -129,7 +130,7 @@ class CatalogApiControllerTest {
     @Test
     @WithMockUser(username = "dean", roles = "DEAN")
     void returnsValidationErrorInSharedErrorFormat() throws Exception {
-        mvc.perform(post("/api/groups")
+        mvc.perform(post("/api/groups").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
@@ -147,7 +148,7 @@ class CatalogApiControllerTest {
         doThrow(new CatalogConflictException("Нельзя удалить студента: он зачислен на курс"))
                 .when(studentService).delete(eq(1L));
 
-        mvc.perform(delete("/api/students/1"))
+        mvc.perform(delete("/api/students/1").with(csrf()))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(409))
@@ -170,7 +171,7 @@ class CatalogApiControllerTest {
                 StudyFormEnum.FULL_TIME
         ));
 
-        mvc.perform(post("/api/groups")
+        mvc.perform(post("/api/groups").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {

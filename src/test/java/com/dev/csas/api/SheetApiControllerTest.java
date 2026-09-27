@@ -7,7 +7,6 @@ import com.dev.csas.api.course.CourseController;
 import com.dev.csas.api.course.CourseDetailsResponse;
 import com.dev.csas.api.course.StudentCourseController;
 import com.dev.csas.api.course.StudentCourseDetailsResponse;
-import com.dev.csas.api.course.StudentCourseSummaryResponse;
 import com.dev.csas.api.control.ControlSheetDetailsResponse;
 import com.dev.csas.api.attendance.AttendanceSheetDetailsResponse;
 import com.dev.csas.attendance.AttendanceSheetStatus;
@@ -44,6 +43,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,7 +84,6 @@ class SheetApiControllerTest {
     void rejectsUnauthenticatedApiRequestWithJson() throws Exception {
         mvc.perform(get("/api/attendance-sheets/1"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(header().string("WWW-Authenticate", org.hamcrest.Matchers.containsString("Basic")))
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.message").value("Требуется аутентификация"));
     }
@@ -145,7 +144,7 @@ class SheetApiControllerTest {
     @Test
     @WithMockUser(username = "dean", roles = "DEAN")
     void deniesDeanFromChangingCourseWorks() throws Exception {
-        mvc.perform(post("/api/courses/3/works")
+        mvc.perform(post("/api/courses/3/works").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"title\":\"Работа\",\"maxScore\":20,\"date\":\"2026-10-01\"}"))
                 .andExpect(status().isForbidden())
@@ -203,7 +202,7 @@ class SheetApiControllerTest {
         when(attendance.addLecture(eq(3L), eq(new TeacherID(12)), eq(java.time.LocalDate.parse("2026-10-05")), eq("Введение")))
                 .thenReturn(new LectureID(51));
 
-        mvc.perform(post("/api/attendance-sheets/3/lectures")
+        mvc.perform(post("/api/attendance-sheets/3/lectures").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"date\":\"2026-10-05\",\"title\":\"Введение\"}"))
                 .andExpect(status().isCreated())
@@ -215,7 +214,7 @@ class SheetApiControllerTest {
     @Test
     @WithMockUser(username = "dean", roles = "DEAN")
     void deniesDeanFromAddingLecture() throws Exception {
-        mvc.perform(post("/api/attendance-sheets/3/lectures")
+        mvc.perform(post("/api/attendance-sheets/3/lectures").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"date\":\"2026-10-05\",\"title\":\"Введение\"}"))
                 .andExpect(status().isForbidden())
@@ -225,7 +224,7 @@ class SheetApiControllerTest {
     @Test
     @WithMockUser(username = "teacher", roles = "TEACHER")
     void rejectsInvalidNumericResultBeforeCallingService() throws Exception {
-        mvc.perform(put("/api/control-sheets/3/results/8/numeric")
+        mvc.perform(put("/api/control-sheets/3/results/8/numeric").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"score\":101}"))
                 .andExpect(status().isBadRequest())
@@ -237,7 +236,7 @@ class SheetApiControllerTest {
     void entersNumericResultUsingCurrentTeacher() throws Exception {
         when(actors.teacher(any())).thenReturn(new TeacherID(12));
 
-        mvc.perform(put("/api/control-sheets/3/results/8/numeric")
+        mvc.perform(put("/api/control-sheets/3/results/8/numeric").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"score\":88,\"reason\":\"Пересдача\"}"))
                 .andExpect(status().isNoContent());
@@ -250,7 +249,7 @@ class SheetApiControllerTest {
     void entersPassFailResultUsingCurrentTeacher() throws Exception {
         when(actors.teacher(any())).thenReturn(new TeacherID(12));
 
-        mvc.perform(put("/api/control-sheets/3/results/8/pass-fail")
+        mvc.perform(put("/api/control-sheets/3/results/8/pass-fail").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"result\":\"PASS\"}"))
                 .andExpect(status().isNoContent());
@@ -263,7 +262,7 @@ class SheetApiControllerTest {
     void registersAttendanceUsingCurrentTeacher() throws Exception {
         when(actors.teacher(any())).thenReturn(new TeacherID(12));
 
-        mvc.perform(put("/api/attendance-sheets/3/lectures/5/attendance/8")
+        mvc.perform(put("/api/attendance-sheets/3/lectures/5/attendance/8").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"ABSENT\"}"))
                 .andExpect(status().isNoContent());
@@ -282,7 +281,7 @@ class SheetApiControllerTest {
     void archivesAttendanceSheetUsingCurrentDean() throws Exception {
         when(actors.dean(any())).thenReturn(new DeanID(7));
 
-        mvc.perform(post("/api/attendance-sheets/3/archive"))
+        mvc.perform(post("/api/attendance-sheets/3/archive").with(csrf()))
                 .andExpect(status().isNoContent());
 
         verify(attendance).archive(3, new DeanID(7));
@@ -293,7 +292,7 @@ class SheetApiControllerTest {
     void reopensControlSheetWithReasonUsingCurrentDean() throws Exception {
         when(actors.dean(any())).thenReturn(new DeanID(7));
 
-        mvc.perform(post("/api/control-sheets/3/reopen")
+        mvc.perform(post("/api/control-sheets/3/reopen").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"reason\":\"Исправление результата\"}"))
                 .andExpect(status().isNoContent());
@@ -308,7 +307,7 @@ class SheetApiControllerTest {
         doThrow(new AttendanceSheetNotFoundException("Ведомость посещаемости не найдена: 3"))
                 .when(attendance).close(3, new TeacherID(12));
 
-        mvc.perform(post("/api/attendance-sheets/3/close"))
+        mvc.perform(post("/api/attendance-sheets/3/close").with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.message").value("Ведомость посещаемости не найдена: 3"));
