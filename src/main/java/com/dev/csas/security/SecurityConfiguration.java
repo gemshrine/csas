@@ -102,7 +102,10 @@ public class SecurityConfiguration {
     @Bean
     @Order(2)
     SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/control-sheets/**", "/attendance-sheets/**")
+                .hasAnyRole("TEACHER", "DEAN")
+                .anyRequest().permitAll());
         return http.build();
     }
 
