@@ -1,5 +1,6 @@
 package com.dev.csas.api.error;
 
+import com.dev.csas.api.auth.InvalidCredentialsException;
 import com.dev.csas.attendance.AttendanceSheetNotFoundException;
 import com.dev.csas.attendance.DuplicateLectureException;
 import com.dev.csas.attendance.InvalidRegisterException;
@@ -72,6 +73,14 @@ public class ApiExceptionHandler {
     @ExceptionHandler({ActorAccessDeniedException.class, UnauthorizedTeacherException.class})
     public ResponseEntity<ApiErrorResponse> forbidden(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.FORBIDDEN, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> invalidCredentials(
+            InvalidCredentialsException exception,
+            HttpServletRequest request
+    ) {
+        return error(HttpStatus.UNAUTHORIZED, exception.getMessage(), request);
     }
 
     @ExceptionHandler({SheetStatusException.class, IncompleteControlSheetException.class,

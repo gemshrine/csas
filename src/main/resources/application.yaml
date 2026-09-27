@@ -17,3 +17,11 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  session:
+    timeout: 5m
+    jdbc:
+      initialize-schema: never
+server:
+  servlet:
+    session:
+      timeout: 5m

@@ -73,6 +73,15 @@ cp .env.example .env
 ./mvnw spring-boot:run
 ```
 
+Чтобы запустить приложение с демонстрационными данными, используй профиль `dev`:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+Он работает в отдельной схеме `csas_dev`. Подробности о профиле, тестовых
+учётках и запуске из IntelliJ IDEA описаны в [docs/development.md](docs/development.md).
+
 Spring Boot через зависимость `spring-boot-docker-compose` сам поднимает
 сервисы из `compose.yaml` (PostgreSQL и pgAdmin). Отдельно вызывать
 `docker compose up -d` не нужно: если контейнеры уже запущены вручную, возможен
