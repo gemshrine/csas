@@ -18,6 +18,7 @@ public record StudentCourseDetailsResponse(
         Double rating,
         Integer courseworkScore,
         CourseworkGrade courseworkGrade,
+        StudentControlResultResponse controlResult,
         List<WorkResult> works
 ) {
     public record WorkResult(long number, String title, int maxScore, LocalDate date, Integer score) {

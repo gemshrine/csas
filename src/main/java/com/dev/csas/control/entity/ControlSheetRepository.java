@@ -19,6 +19,8 @@ public interface ControlSheetRepository extends JpaRepository<ControlSheetJPAEnt
     @EntityGraph(attributePaths = {"course.discipline", "course.group", "course.startSemester", "course.endSemester", "course.teacher"})
     Optional<ControlSheetJPAEntity> findDetailedById(Long id);
 
+    Optional<ControlSheetJPAEntity> findByCourse_Id(Long courseId);
+
     @Query("select new com.dev.csas.control.ControlSheetReadModel(s.course.id, s.id, s.status) " +
             "from ControlSheetJPAEntity s where s.course.id in :courseIds")
     List<ControlSheetReadModel> findCourseSheetReadModels(@Param("courseIds") Collection<Long> courseIds);

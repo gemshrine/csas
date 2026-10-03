@@ -5,6 +5,7 @@ import com.dev.csas.shared.TeacherID;
 import com.dev.csas.api.control.ControlSheetDetailsResponse;
 import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.course.CourseQueryService;
+import com.dev.csas.course.StudentCourseQueryService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,9 @@ class ControlSheetApplicationServiceIntegrationTest {
 
     @Autowired
     private CourseQueryService courseQueries;
+
+    @Autowired
+    private StudentCourseQueryService studentCourseQueries;
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -106,6 +110,8 @@ class ControlSheetApplicationServiceIntegrationTest {
         assertEquals(1, result.students().size());
         assertNull(result.students().getFirst().numericScore());
         assertNull(result.students().getFirst().passFail());
+        assertNull(result.students().getFirst().finalScore());
+        assertNull(result.students().getFirst().finalGrade());
         assertThrows(ActorAccessDeniedException.class, () -> queries.getForTeacher(
                 fixture.sheetId(),
                 new TeacherID(fixture.seminarTeacherId() + 100)
@@ -122,6 +128,70 @@ class ControlSheetApplicationServiceIntegrationTest {
                 fixture.sheetId(),
                 new TeacherID(fixture.seminarTeacherId())
         ).students().getFirst().numericScore());
+    }
+
+    @Test
+    void exposesNumericFinalResultToStudentAndDeanOnlyAfterClosing() {
+        Fixture fixture = insertFixture("EXAM");
+        service.enterNumericResult(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId()),
+                new StudentID(fixture.studentId()),
+                88,
+                null
+        );
+
+        var openResult = studentCourseQueries.get(
+                new StudentID(fixture.studentId()), fixture.seminarCourseId()
+        ).controlResult();
+        assertEquals(ControlSheetStatus.OPEN, openResult.sheetStatus());
+        assertNull(openResult.numericScore());
+        assertNull(openResult.finalScore());
+        assertNull(openResult.finalGrade());
+
+        service.close(fixture.sheetId(), new TeacherID(fixture.seminarTeacherId()));
+
+        var studentResult = studentCourseQueries.get(
+                new StudentID(fixture.studentId()), fixture.seminarCourseId()
+        ).controlResult();
+        assertEquals(ControlSheetStatus.CLOSED, studentResult.sheetStatus());
+        assertEquals(88, studentResult.numericScore());
+        assertEquals(74.0, studentResult.finalScore());
+        assertEquals(3, studentResult.finalGrade());
+
+        var summary = studentCourseQueries.list(new StudentID(fixture.studentId())).stream()
+                .filter(course -> course.courseId() == fixture.seminarCourseId())
+                .findFirst()
+                .orElseThrow();
+        assertEquals(3, summary.controlResult().finalGrade());
+
+        var deanResult = queries.getForDean(fixture.sheetId()).students().getFirst();
+        assertEquals(88, deanResult.numericScore());
+        assertEquals(74.0, deanResult.finalScore());
+        assertEquals(3, deanResult.finalGrade());
+    }
+
+    @Test
+    void exposesPassFailAsCreditOutcomeWithoutNumericFinalGrade() {
+        Fixture fixture = insertFixture("CREDIT");
+        service.enterPassFailResult(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId()),
+                new StudentID(fixture.studentId()),
+                PassFail.PASS,
+                null
+        );
+        service.close(fixture.sheetId(), new TeacherID(fixture.seminarTeacherId()));
+
+        var result = studentCourseQueries.get(
+                new StudentID(fixture.studentId()), fixture.seminarCourseId()
+        ).controlResult();
+
+        assertEquals(ControlSheetStatus.CLOSED, result.sheetStatus());
+        assertEquals(PassFail.PASS, result.passFail());
+        assertNull(result.numericScore());
+        assertNull(result.finalScore());
+        assertNull(result.finalGrade());
     }
 
     @Test
@@ -150,6 +220,10 @@ class ControlSheetApplicationServiceIntegrationTest {
     }
 
     private Fixture insertFixture() {
+        return insertFixture("EXAM");
+    }
+
+    private Fixture insertFixture(String controlForm) {
         long groupId = insert(
                 "INSERT INTO groups (name, year_of_admission, specialty, course, education_form, study_form) " +
                         "VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
@@ -173,7 +247,7 @@ class ControlSheetApplicationServiceIntegrationTest {
         long disciplineId = insert(
                 "INSERT INTO disciplines (name, lecture_hours, practice_hours, lab_hours, control_form) " +
                         "VALUES (?, ?, ?, ?, ?) RETURNING id",
-                "Дисциплина интеграционного теста", 16, 32, 16, "EXAM"
+                "Дисциплина интеграционного теста", 16, 32, 16, controlForm
         );
         long semesterId = insert(
                 "INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
@@ -215,11 +289,11 @@ class ControlSheetApplicationServiceIntegrationTest {
         long sheetId = insert(
                 "INSERT INTO control_sheets " +
                         "(course_id, control_form, status, grade_5_from, grade_4_from, grade_3_from) " +
-                        "VALUES (?, 'EXAM', 'OPEN', 90, 80, 70) RETURNING id",
-                seminarCourseId
+                        "VALUES (?, ?, 'OPEN', 90, 80, 70) RETURNING id",
+                seminarCourseId, controlForm
         );
 
-        return new Fixture(sheetId, studentId, seminarTeacherId, lectureTeacherId);
+        return new Fixture(sheetId, seminarCourseId, studentId, seminarTeacherId, lectureTeacherId);
     }
 
     private long insert(String sql, Object... parameters) {
@@ -230,6 +304,12 @@ class ControlSheetApplicationServiceIntegrationTest {
         return id;
     }
 
-    private record Fixture(long sheetId, long studentId, long seminarTeacherId, long lectureTeacherId) {
+    private record Fixture(
+            long sheetId,
+            long seminarCourseId,
+            long studentId,
+            long seminarTeacherId,
+            long lectureTeacherId
+    ) {
     }
 }
