@@ -60,7 +60,7 @@ public class TeacherService {
     @Transactional
     public void delete(Long id) {
         getTeacher(id);
-        if (courseRepository.existsBySeminarTeacher_IdOrLectureTeacher_Id(id, id)) {
+        if (courseRepository.existsByTeacher_Id(id)) {
             throw new CatalogConflictException(
                     "Нельзя удалить преподавателя: он назначен на курс"
             );

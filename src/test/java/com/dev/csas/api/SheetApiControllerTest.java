@@ -4,6 +4,7 @@ import com.dev.csas.api.attendance.AttendanceSheetController;
 import com.dev.csas.api.control.ControlSheetController;
 import com.dev.csas.api.course.CourseListController;
 import com.dev.csas.api.course.CourseController;
+import com.dev.csas.api.course.CourseCreationRequest;
 import com.dev.csas.api.course.CourseDetailsResponse;
 import com.dev.csas.api.course.StudentCourseController;
 import com.dev.csas.api.course.StudentCourseDetailsResponse;
@@ -19,6 +20,7 @@ import com.dev.csas.control.ControlSheetQueryService;
 import com.dev.csas.attendance.AttendanceSheetQueryService;
 import com.dev.csas.course.CourseQueryService;
 import com.dev.csas.course.CourseApplicationService;
+import com.dev.csas.course.CourseAssignmentService;
 import com.dev.csas.course.StudentCourseQueryService;
 import com.dev.csas.security.CurrentActorResolver;
 import com.dev.csas.security.SecurityConfiguration;
@@ -70,6 +72,9 @@ class SheetApiControllerTest {
 
     @MockitoBean
     private CourseQueryService courseQueries;
+
+    @MockitoBean
+    private CourseAssignmentService courseAssignment;
 
     @MockitoBean
     private CourseApplicationService courseApplication;
@@ -125,12 +130,59 @@ class SheetApiControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deanCanAssignCourse() throws Exception {
+        when(actors.dean(any())).thenReturn(new DeanID(8));
+        when(courseAssignment.assign(any(CourseCreationRequest.class))).thenReturn(
+                new CourseHeaderResponse(15, "Базы данных", "ИВТ-301", "Осень 2026", "Весна 2027",
+                        com.dev.csas.course.CourseType.COURSEWORK, com.dev.csas.course.CourseStatus.IN_PROGRESS));
+
+        mvc.perform(post("/api/courses").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"disciplineId":4,"groupId":2,"startSemesterId":3,"endSemesterId":4,
+                                 "courseType":"COURSEWORK","teacherId":7}
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.courseType").value("COURSEWORK"))
+                .andExpect(jsonPath("$.startSemesterName").value("Осень 2026"));
+
+        verify(courseAssignment).assign(any(CourseCreationRequest.class));
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void seminarTeacherCanCreateControlSheetWithGradingScale() throws Exception {
+        when(actors.teacher(any())).thenReturn(new TeacherID(12));
+        when(controls.createForCompletedCourse(eq(3L), eq(new TeacherID(12)), any()))
+                .thenReturn(34L);
+
+        mvc.perform(post("/api/courses/3/control-sheet").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"grade5From\":85,\"grade4From\":70,\"grade3From\":50}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.sheetId").value(34));
+
+        verify(controls).createForCompletedCourse(eq(3L), eq(new TeacherID(12)), any());
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void rejectsUnorderedGradingScale() throws Exception {
+        mvc.perform(post("/api/courses/3/control-sheet").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"grade5From\":70,\"grade4From\":80,\"grade3From\":50}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @WithMockUser(username = "teacher", roles = "TEACHER")
     void getsCourseDetailsUsingCurrentTeacher() throws Exception {
         when(actors.teacher(any())).thenReturn(new TeacherID(12));
         when(courseApplication.getForTeacher(eq(3L), eq(new TeacherID(12))))
-                .thenReturn(new CourseDetailsResponse(3, "Базы данных", "ИВТ-301", "Осень 2026",
-                        com.dev.csas.course.CourseStatus.IN_PROGRESS, java.util.List.of(), java.util.List.of()));
+                .thenReturn(new CourseDetailsResponse(3, "Базы данных", "ИВТ-301", "Осень 2026", "Весна 2027",
+                        com.dev.csas.course.CourseType.SEMINAR, com.dev.csas.course.CourseStatus.IN_PROGRESS,
+                        java.util.List.of(), java.util.List.of()));
 
         mvc.perform(get("/api/courses/3"))
                 .andExpect(status().isOk())
@@ -156,8 +208,9 @@ class SheetApiControllerTest {
     void getsOwnCoursePerformanceUsingCurrentStudent() throws Exception {
         when(actors.student(any())).thenReturn(new StudentID(21));
         when(studentCourseQueries.get(new StudentID(21), 3L)).thenReturn(
-                new StudentCourseDetailsResponse(3, "Базы данных", "ИВТ-301", "Осень 2026",
-                        com.dev.csas.course.CourseStatus.IN_PROGRESS, 90.0,
+                new StudentCourseDetailsResponse(3, "Базы данных", "ИВТ-301", "Осень 2026", "Весна 2027",
+                        com.dev.csas.course.CourseType.SEMINAR, com.dev.csas.course.CourseStatus.IN_PROGRESS, 90.0,
+                        null, null,
                         java.util.List.of(new StudentCourseDetailsResponse.WorkResult(1, "Лабораторная", 20,
                                 java.time.LocalDate.parse("2026-10-01"), 18))));
 

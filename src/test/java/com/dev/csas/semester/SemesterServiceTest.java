@@ -98,7 +98,7 @@ class SemesterServiceTest {
     @Test
     void deleteThrowsWhenCoursesExist() {
         when(semesterRepository.findById(3L)).thenReturn(Optional.of(semester(3L)));
-        when(courseRepository.existsBySemester_Id(3L)).thenReturn(true);
+        when(courseRepository.existsByStartSemester_Id(3L)).thenReturn(true);
 
         assertThatThrownBy(() -> semesterService.delete(3L))
                 .isInstanceOf(CatalogConflictException.class)
@@ -109,7 +109,8 @@ class SemesterServiceTest {
     @Test
     void deleteRemovesUnusedSemester() {
         when(semesterRepository.findById(3L)).thenReturn(Optional.of(semester(3L)));
-        when(courseRepository.existsBySemester_Id(3L)).thenReturn(false);
+        when(courseRepository.existsByStartSemester_Id(3L)).thenReturn(false);
+        when(courseRepository.existsByEndSemester_Id(3L)).thenReturn(false);
 
         semesterService.delete(3L);
 

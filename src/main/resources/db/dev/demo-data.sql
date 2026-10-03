@@ -27,18 +27,38 @@ VALUES ('Демонстрационная дисциплина', 16, 32, 16, 'EX
 INSERT INTO semesters (name, start_date, end_date)
 VALUES ('Демо семестр 2026', DATE '2026-09-01', DATE '2027-01-31');
 
-INSERT INTO courses (discipline_id, group_id, semester_id, seminar_teacher_id, lecture_teacher_id, status)
-SELECT d.id, g.id, s.id, ts.id, tl.id, 'IN_PROGRESS'
+INSERT INTO courses (
+    discipline_id, group_id, start_semester_id, end_semester_id, course_type, teacher_id, status
+)
+SELECT d.id, g.id, s.id, s.id, 'SEMINAR', t.id, 'COMPLETED'
 FROM disciplines d
 CROSS JOIN groups g
 CROSS JOIN semesters s
-CROSS JOIN teachers ts
-CROSS JOIN teachers tl
+CROSS JOIN teachers t
 WHERE d.name = 'Демонстрационная дисциплина'
   AND g.name = 'DEMO-301'
   AND s.name = 'Демо семестр 2026'
-  AND ts.last_name = 'Семинарова'
-  AND tl.last_name = 'Лекторов';
+  AND t.last_name = 'Семинарова'
+UNION ALL
+SELECT d.id, g.id, s.id, s.id, 'LECTURE', t.id, 'IN_PROGRESS'
+FROM disciplines d
+CROSS JOIN groups g
+CROSS JOIN semesters s
+CROSS JOIN teachers t
+WHERE d.name = 'Демонстрационная дисциплина'
+  AND g.name = 'DEMO-301'
+  AND s.name = 'Демо семестр 2026'
+  AND t.last_name = 'Лекторов'
+UNION ALL
+SELECT d.id, g.id, s.id, s.id, 'COURSEWORK', t.id, 'COMPLETED'
+FROM disciplines d
+CROSS JOIN groups g
+CROSS JOIN semesters s
+CROSS JOIN teachers t
+WHERE d.name = 'Демонстрационная дисциплина'
+  AND g.name = 'DEMO-301'
+  AND s.name = 'Демо семестр 2026'
+  AND t.last_name = 'Семинарова';
 
 INSERT INTO course_students (course_id, student_id)
 SELECT c.id, st.id
@@ -50,7 +70,8 @@ WHERE st.record_book_number = 'DEMO0001'
 INSERT INTO course_works (course_id, number, title, max_score, work_date)
 SELECT id, 1, 'Демонстрационная работа', 20, DATE '2026-10-01'
 FROM courses
-WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина');
+WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина')
+  AND course_type = 'SEMINAR';
 
 INSERT INTO course_scores (work_id, student_id, score)
 SELECT w.id, st.id, 16
@@ -62,7 +83,8 @@ WHERE w.title = 'Демонстрационная работа'
 INSERT INTO control_sheets (course_id, control_form, status, grade_5_from, grade_4_from, grade_3_from)
 SELECT id, 'EXAM', 'OPEN', 90, 80, 70
 FROM courses
-WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина');
+WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина')
+  AND course_type = 'SEMINAR';
 
 INSERT INTO control_results (control_sheet_id, student_id, numeric_score)
 SELECT cs.id, st.id, 84
@@ -70,18 +92,34 @@ FROM control_sheets cs
 CROSS JOIN students st
 WHERE st.record_book_number = 'DEMO0001'
   AND cs.course_id = (SELECT id FROM courses WHERE discipline_id =
-      (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина'));
+      (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина') AND course_type = 'SEMINAR');
 
 INSERT INTO attendance_sheets (course_id, status)
 SELECT id, 'OPEN'
 FROM courses
-WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина');
+WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина')
+  AND course_type = 'LECTURE';
+
+INSERT INTO coursework_sheets (course_id, status)
+SELECT id, 'OPEN'
+FROM courses
+WHERE discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина')
+  AND course_type = 'COURSEWORK';
+
+INSERT INTO coursework_results (coursework_sheet_id, student_id, score)
+SELECT sheet.id, st.id, 70
+FROM coursework_sheets sheet
+JOIN courses course ON course.id = sheet.course_id
+CROSS JOIN students st
+WHERE course.discipline_id = (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина')
+  AND course.course_type = 'COURSEWORK'
+  AND st.record_book_number = 'DEMO0001';
 
 INSERT INTO lectures (attendance_sheet_id, lecture_date, title)
 SELECT id, DATE '2026-09-15', 'Вводная лекция'
 FROM attendance_sheets
 WHERE course_id = (SELECT id FROM courses WHERE discipline_id =
-    (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина'));
+    (SELECT id FROM disciplines WHERE name = 'Демонстрационная дисциплина') AND course_type = 'LECTURE');
 
 INSERT INTO lecture_attendance (lecture_id, student_id, was_present)
 SELECT l.id, st.id, TRUE

@@ -6,6 +6,7 @@ import com.dev.csas.api.control.ControlStudentResultResponse;
 import com.dev.csas.api.control.GradingScaleResponse;
 import com.dev.csas.control.entity.ControlSheetJPAEntity;
 import com.dev.csas.control.entity.ControlSheetRepository;
+import com.dev.csas.course.CourseType;
 import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.shared.TeacherID;
 import com.dev.csas.student.StudentReadModel;
@@ -28,7 +29,8 @@ public class ControlSheetQueryService {
     @Transactional(readOnly = true)
     public ControlSheetDetailsResponse getForTeacher(long sheetId, TeacherID teacher) {
         ControlSheetJPAEntity sheet = findSheet(sheetId);
-        if (!sheet.getCourse().getSeminarTeacher().getId().equals(teacher.id())) {
+        if (sheet.getCourse().getCourseType() != CourseType.SEMINAR
+                || !sheet.getCourse().getTeacher().getId().equals(teacher.id())) {
             throw new ActorAccessDeniedException("Нет доступа к контрольной ведомости этого курса");
         }
         return toResponse(sheet);
@@ -58,7 +60,9 @@ public class ControlSheetQueryService {
                         course.getId(),
                         course.getDiscipline().getName(),
                         course.getGroup().getName(),
-                        course.getSemester().getName(),
+                        course.getStartSemester().getName(),
+                        course.getEndSemester().getName(),
+                        course.getCourseType(),
                         course.getStatus()
                 ),
                 sheet.getControlForm(),

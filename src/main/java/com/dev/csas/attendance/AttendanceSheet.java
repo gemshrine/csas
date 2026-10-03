@@ -3,6 +3,8 @@ package com.dev.csas.attendance;
 import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.Course;
 import com.dev.csas.course.CourseCompletedException;
+import com.dev.csas.course.CourseType;
+import com.dev.csas.course.InvalidCourseTypeException;
 import com.dev.csas.course.NonExistentStudentException;
 import com.dev.csas.shared.*;
 
@@ -16,10 +18,13 @@ public class AttendanceSheet {
     private AttendanceSheetStatus status = AttendanceSheetStatus.OPEN;
 
     public AttendanceSheet(Course course) {
-        if (course.isCompleted()) {
-            throw new CourseCompletedException("Курс не должен быть завершенным");
+        this.course = Objects.requireNonNull(course);
+        if (course.type() != CourseType.LECTURE) {
+            throw new InvalidCourseTypeException("Ведомость посещаемости создаётся только для лекционного курса");
         }
-        this.course = course;
+        if (course.isCompleted()) {
+            throw new CourseCompletedException("Нельзя создать ведомость для завершенного курса");
+        }
     }
 
     private AttendanceSheet(Course course, AttendanceSheetStatus status) {
@@ -40,7 +45,7 @@ public class AttendanceSheet {
     }
 
     public void addLecture(TeacherID teacherID, LectureID lectureID, LocalDate date, String title) {
-        validateOpen();
+        validateWritable();
         validateTeacher(teacherID);
 
         if (findLecture(lectureID) != null) {
@@ -51,7 +56,7 @@ public class AttendanceSheet {
     }
 
     public void register(TeacherID teacherID, StudentID student, AttendanceStatusEnum status, LectureID lectureID) {
-        validateOpen();
+        validateWritable();
         validateTeacher(teacherID);
 
         if (findLecture(lectureID) == null) {
@@ -119,14 +124,21 @@ public class AttendanceSheet {
     }
 
     private void validateTeacher(TeacherID teacherID) {
-        if (!teacherID.equals(course.lectureTeacher())) {
-            throw new UnauthorizedTeacherException("Преподаватель не является лектором");
+        if (!teacherID.equals(course.teacher())) {
+            throw new UnauthorizedTeacherException("Операция доступна только преподавателю этого курса");
         }
     }
 
     private void validateOpen() {
-        if (status != AttendanceSheetStatus.OPEN || course.isCompleted()) {
+        if (status != AttendanceSheetStatus.OPEN) {
             throw new SheetStatusException("Нельзя вносить изменения в закрытую ведомость");
+        }
+    }
+
+    private void validateWritable() {
+        validateOpen();
+        if (course.isCompleted()) {
+            throw new CourseCompletedException("Нельзя изменять ведомость завершенного курса");
         }
     }
 

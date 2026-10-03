@@ -199,17 +199,25 @@ class AttendanceSheetApplicationServiceIntegrationTest {
                 "INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
                 "Тестовый семестр", Date.valueOf("2026-09-01"), Date.valueOf("2027-01-31")
         );
-        long courseId = insert(
+        long seminarCourseId = insert(
                 "INSERT INTO courses " +
-                        "(discipline_id, group_id, semester_id, seminar_teacher_id, lecture_teacher_id, status) " +
-                        "VALUES (?, ?, ?, ?, ?, 'IN_PROGRESS') RETURNING id",
-                disciplineId, groupId, semesterId, seminarTeacherId, lectureTeacherId
+                        "(discipline_id, group_id, start_semester_id, end_semester_id, course_type, teacher_id, status) " +
+                        "VALUES (?, ?, ?, ?, 'SEMINAR', ?, 'IN_PROGRESS') RETURNING id",
+                disciplineId, groupId, semesterId, semesterId, seminarTeacherId
         );
-        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", courseId, firstStudentId);
-        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", courseId, secondStudentId);
+        long lectureCourseId = insert(
+                "INSERT INTO courses " +
+                        "(discipline_id, group_id, start_semester_id, end_semester_id, course_type, teacher_id, status) " +
+                        "VALUES (?, ?, ?, ?, 'LECTURE', ?, 'IN_PROGRESS') RETURNING id",
+                disciplineId, groupId, semesterId, semesterId, lectureTeacherId
+        );
+        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", seminarCourseId, firstStudentId);
+        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", seminarCourseId, secondStudentId);
+        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", lectureCourseId, firstStudentId);
+        jdbc.update("INSERT INTO course_students (course_id, student_id) VALUES (?, ?)", lectureCourseId, secondStudentId);
         long sheetId = insert(
                 "INSERT INTO attendance_sheets (course_id, status) VALUES (?, 'OPEN') RETURNING id",
-                courseId
+                lectureCourseId
         );
 
         return new Fixture(sheetId, firstStudentId, secondStudentId, seminarTeacherId, lectureTeacherId);

@@ -5,6 +5,7 @@ import com.dev.csas.api.attendance.AttendanceSheetDetailsResponse;
 import com.dev.csas.api.attendance.AttendanceRosterStudentResponse;
 import com.dev.csas.api.attendance.AttendanceStudentResponse;
 import com.dev.csas.api.attendance.LectureDetailsResponse;
+import com.dev.csas.course.CourseType;
 import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.shared.TeacherID;
 import com.dev.csas.student.StudentReadModel;
@@ -28,7 +29,8 @@ public class AttendanceSheetQueryService {
     @Transactional(readOnly = true)
     public AttendanceSheetDetailsResponse getForTeacher(long sheetId, TeacherID teacher) {
         AttendanceSheetJPAEntity sheet = findSheet(sheetId);
-        if (!sheet.getCourse().getLectureTeacher().getId().equals(teacher.id())) {
+        if (sheet.getCourse().getCourseType() != CourseType.LECTURE
+                || !sheet.getCourse().getTeacher().getId().equals(teacher.id())) {
             throw new ActorAccessDeniedException("Нет доступа к ведомости посещаемости этого курса");
         }
         return toResponse(sheet);
@@ -79,7 +81,9 @@ public class AttendanceSheetQueryService {
                         course.getId(),
                         course.getDiscipline().getName(),
                         course.getGroup().getName(),
-                        course.getSemester().getName(),
+                        course.getStartSemester().getName(),
+                        course.getEndSemester().getName(),
+                        course.getCourseType(),
                         course.getStatus()
                 ),
                 sheet.getStatus(),

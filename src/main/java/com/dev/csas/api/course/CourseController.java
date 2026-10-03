@@ -1,6 +1,9 @@
 package com.dev.csas.api.course;
 
 import com.dev.csas.course.CourseApplicationService;
+import com.dev.csas.control.ControlSheetApplicationService;
+import com.dev.csas.control.GradingScale;
+import com.dev.csas.api.control.CreateControlSheetRequest;
 import com.dev.csas.security.CurrentActorResolver;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -12,11 +15,26 @@ import org.springframework.web.bind.annotation.*;
 public class CourseController {
 
     private final CourseApplicationService courses;
+    private final ControlSheetApplicationService controlSheets;
     private final CurrentActorResolver actors;
 
-    public CourseController(CourseApplicationService courses, CurrentActorResolver actors) {
+    public CourseController(CourseApplicationService courses, ControlSheetApplicationService controlSheets,
+                            CurrentActorResolver actors) {
         this.courses = courses;
+        this.controlSheets = controlSheets;
         this.actors = actors;
+    }
+
+    @PostMapping("/control-sheet")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ControlSheetCreatedResponse createControlSheet(
+            @PathVariable long courseId,
+            @Valid @RequestBody CreateControlSheetRequest request,
+            Authentication authentication
+    ) {
+        long sheetId = controlSheets.createForCompletedCourse(courseId, actors.teacher(authentication),
+                new GradingScale(request.grade5From(), request.grade4From(), request.grade3From()));
+        return new ControlSheetCreatedResponse(sheetId);
     }
 
     @GetMapping
@@ -61,5 +79,8 @@ public class CourseController {
     }
 
     public record CourseWorkCreatedResponse(long workNumber) {
+    }
+
+    public record ControlSheetCreatedResponse(long sheetId) {
     }
 }

@@ -12,7 +12,7 @@ import java.util.Collection;
 
 public interface AttendanceSheetRepository extends JpaRepository<AttendanceSheetJPAEntity, Long> {
 
-    @EntityGraph(attributePaths = {"course.discipline", "course.group", "course.semester", "course.lectureTeacher"})
+    @EntityGraph(attributePaths = {"course.discipline", "course.group", "course.startSemester", "course.endSemester", "course.teacher"})
     Optional<AttendanceSheetJPAEntity> findDetailedById(Long id);
 
     @Query("select new com.dev.csas.attendance.AttendanceSheetReadModel(s.course.id, s.id, s.status) " +

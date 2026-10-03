@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Проверка ведомостей</title>
+</head>
+<body>
+<main>
+    <h1>Проверка ведомостей</h1>
+    <form id="login-form">
+        <label for="username">Логин</label>
+        <input id="username" name="username" value="demo-seminar" autocomplete="username" required>
+        <label for="password">Пароль</label>
+        <input id="password" name="password" type="password" value="demo1234" autocomplete="current-password" required>
+        <button type="submit">Войти</button>
+    </form>
+    <p id="message" aria-live="polite"></p>
+    <button id="refresh" type="button" hidden>Обновить курсы</button>
+    <button id="logout" type="button" hidden>Выйти</button>
+    <ul id="courses"></ul>
+</main>
+<script>
+    const loginForm = document.getElementById('login-form');
+    const message = document.getElementById('message');
+    const coursesList = document.getElementById('courses');
+    const refreshButton = document.getElementById('refresh');
+    const logoutButton = document.getElementById('logout');
+
+    async function csrf() {
+        const response = await fetch('/api/auth/csrf', {credentials: 'same-origin'});
+        if (!response.ok) {
+            throw new Error(`Не удалось получить CSRF-токен: HTTP ${response.status}`);
+        }
+        return response.json();
+    }
+
+    async function api(path, options = {}) {
+        const response = await fetch(path, {credentials: 'same-origin', ...options});
+        const body = await response.json().catch(() => null);
+        if (!response.ok) {
+            throw new Error(body?.message ?? `Ошибка HTTP ${response.status}`);
+        }
+        return body;
+    }
+
+    function showSignedIn(user) {
+        message.textContent = `Вход выполнен: ${user.username}, роль ${user.role}`;
+        refreshButton.hidden = false;
+        logoutButton.hidden = false;
+    }
+
+    async function loadCourses() {
+        const courses = await api('/api/courses');
+        coursesList.replaceChildren();
+
+        if (courses.length === 0) {
+            message.textContent = 'Доступных курсов нет.';
+            return;
+        }
+
+        for (const course of courses) {
+            const item = document.createElement('li');
+            const title = document.createElement('h2');
+            title.textContent = `${course.disciplineName} · ${course.groupName} · ${course.semesterName}`;
+            item.append(title);
+
+            if (course.canReadControlSheet && course.controlSheetId !== null) {
+                const link = document.createElement('a');
+                link.href = `/control-sheets/${course.controlSheetId}`;
+                link.textContent = `Контрольная ведомость (${course.controlSheetStatus})`;
+                item.append(link, document.createElement('br'));
+            }
+
+            if (course.canReadAttendanceSheet && course.attendanceSheetId !== null) {
+                const link = document.createElement('a');
+                link.href = `/attendance-sheets/${course.attendanceSheetId}`;
+                link.textContent = `Посещаемость (${course.attendanceSheetStatus})`;
+                item.append(link);
+            }
+
+            coursesList.append(item);
+        }
+        message.textContent = 'Выбери ведомость для просмотра.';
+    }
+
+    loginForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        message.textContent = 'Выполняется вход…';
+        try {
+            const token = await csrf();
+            const user = await api('/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', [token.headerName]: token.token},
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                })
+            });
+            showSignedIn(user);
+            await loadCourses();
+        } catch (error) {
+            message.textContent = error.message;
+        }
+    });
+
+    refreshButton.addEventListener('click', async () => {
+        try {
+            await loadCourses();
+        } catch (error) {
+            message.textContent = error.message;
+        }
+    });
+
+    logoutButton.addEventListener('click', async () => {
+        try {
+            const token = await csrf();
+            await api('/api/auth/logout', {
+                method: 'POST',
+                headers: {[token.headerName]: token.token}
+            });
+            coursesList.replaceChildren();
+            refreshButton.hidden = true;
+            logoutButton.hidden = true;
+            message.textContent = 'Вы вышли из системы.';
+        } catch (error) {
+            message.textContent = error.message;
+        }
+    });
+
+    api('/api/auth/me')
+        .then(async user => {
+            showSignedIn(user);
+            await loadCourses();
+        })
+        .catch(() => {});
+</script>
+</body>
+</html>

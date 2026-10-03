@@ -25,6 +25,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 @Configuration
@@ -60,6 +62,8 @@ public class SecurityConfiguration {
                         ).hasRole("DEAN")
                         .requestMatchers("/api/me/courses", "/api/me/courses/*").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/courses").hasAnyRole("TEACHER", "DEAN")
+                        .requestMatchers(HttpMethod.POST, "/api/courses").hasRole("DEAN")
+                        .requestMatchers(HttpMethod.POST, "/api/courses/*/control-sheet").hasRole("TEACHER")
                         .requestMatchers(HttpMethod.GET, "/api/courses/*").hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers("/api/courses/*/works", "/api/courses/*/works/*",
                                 "/api/courses/*/works/*/scores/*", "/api/courses/*/complete").hasRole("TEACHER")
@@ -74,6 +78,11 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/control-sheets/*/close").hasRole("TEACHER")
                         .requestMatchers("/api/control-sheets/*/reopen").hasRole("DEAN")
                         .requestMatchers("/api/control-sheets/*/archive").hasRole("DEAN")
+                        .requestMatchers(HttpMethod.GET, "/api/coursework-sheets/*").hasAnyRole("TEACHER", "DEAN")
+                        .requestMatchers("/api/coursework-sheets/*/results/*", "/api/coursework-sheets/*/close")
+                        .hasRole("TEACHER")
+                        .requestMatchers("/api/coursework-sheets/*/reopen", "/api/coursework-sheets/*/archive")
+                        .hasRole("DEAN")
                         .anyRequest().authenticated()
                 )
                 .logout(logout -> logout
@@ -102,10 +111,30 @@ public class SecurityConfiguration {
     @Bean
     @Order(2)
     SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/control-sheets/**", "/attendance-sheets/**")
-                .hasAnyRole("TEACHER", "DEAN")
-                .anyRequest().permitAll());
+        http
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            String returnUrl = request.getRequestURI();
+                            if (request.getQueryString() != null) {
+                                returnUrl += "?" + request.getQueryString();
+                            }
+                            String encodedReturnUrl = URLEncoder.encode(returnUrl, StandardCharsets.UTF_8);
+                            response.sendRedirect("/login?returnUrl=" + encodedReturnUrl);
+                        }))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
+                        .permitAll()
+                        .requestMatchers("/me/courses", "/me/courses/**").hasRole("STUDENT")
+                        .requestMatchers("/courses/**", "/control-sheets/**", "/attendance-sheets/**")
+                        .hasAnyRole("TEACHER", "DEAN")
+                        .requestMatchers(
+                                "/groups/**",
+                                "/students/**",
+                                "/teachers/**",
+                                "/disciplines/**",
+                                "/semesters/**"
+                        ).hasRole("DEAN")
+                        .anyRequest().authenticated());
         return http.build();
     }
 

@@ -5,6 +5,8 @@ import com.dev.csas.control.audit.ControlEventType;
 import com.dev.csas.control.audit.ControlSheetEvent;
 import com.dev.csas.course.Course;
 import com.dev.csas.course.CourseNotCompletedException;
+import com.dev.csas.course.CourseType;
+import com.dev.csas.course.InvalidCourseTypeException;
 import com.dev.csas.course.NonExistentStudentException;
 import com.dev.csas.discipline.ControlFormEnum;
 import com.dev.csas.shared.DeanID;
@@ -26,10 +28,13 @@ public class ControlSheet {
     private final List<ControlSheetEvent> events = new ArrayList<>();
 
     public ControlSheet(Course course, ControlFormEnum controlForm, GradingScale gradingScale) {
+        this.course = Objects.requireNonNull(course);
+        if (course.type() != CourseType.SEMINAR) {
+            throw new InvalidCourseTypeException("Контрольная ведомость создаётся только для семинарного курса");
+        }
         if (!course.isCompleted()) {
             throw new CourseNotCompletedException("Нельзя открыть ведомость для незавершённого курса");
         }
-        this.course = Objects.requireNonNull(course);
         this.controlForm = Objects.requireNonNull(controlForm);
         this.gradingScale = Objects.requireNonNull(gradingScale);
     }
@@ -203,8 +208,8 @@ public class ControlSheet {
             throw new ControlSheetException("Ведомость закрыта или архивирована");
         }
 
-        if (!teacher.equals(course.seminarTeacher())) {
-            throw new UnauthorizedTeacherException("Результат может внести только преподаватель семинарной части");
+        if (!teacher.equals(course.teacher())) {
+            throw new UnauthorizedTeacherException("Результат может внести только преподаватель курса");
         }
     }
 

@@ -39,8 +39,8 @@ public class CourseMapper {
 
         return Course.reconstitute(
                 students,
-                new TeacherID(entity.getSeminarTeacher().getId()),
-                new TeacherID(entity.getLectureTeacher().getId()),
+                entity.getCourseType(),
+                new TeacherID(entity.getTeacher().getId()),
                 entity.getStatus(),
                 works,
                 scores

@@ -19,7 +19,7 @@ public class CourseTest {
 
     @Test
     void ratingEqualsToRatioOfPointsScoredToMaximumPossible() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         long work1 = addWork(course, "Лабораторная 1", 20);
         long work2 = addWork(course, "Лабораторная 2", 30);
 
@@ -31,7 +31,7 @@ public class CourseTest {
 
     @Test
     void updateWorkChangesRating() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         long work1 = addWork(course, "Лабораторная 1", 20);
         course.score(work1, student, 15);
         double ratingBefore = course.rating(student);
@@ -48,7 +48,7 @@ public class CourseTest {
         int scoreDiff = 5;
         int initialScore = 10;
 
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         long work1 = addWork(course, "Лабораторная 1", 20);
 
         course.score(work1, student, initialScore);
@@ -59,7 +59,7 @@ public class CourseTest {
 
     @Test
     void tryToSetScoreToNonExistentStudentWillThrowAnException() {
-        Course course = new Course(List.of());
+        Course course = new Course(List.of(), CourseType.SEMINAR);
         long work1 = addWork(course, "Лабораторная 1", 20);
 
         assertThatThrownBy(() -> course.score(work1, student, 20))
@@ -68,7 +68,7 @@ public class CourseTest {
 
     @Test
     void tryToGetRatingOfNonExistentStudentWillThrowAnException() {
-        Course course = new Course(List.of());
+        Course course = new Course(List.of(), CourseType.SEMINAR);
         long work1 = addWork(course, "Лабораторная 1", 20);
 
         assertThatThrownBy(() -> course.rating(student))
@@ -77,21 +77,21 @@ public class CourseTest {
 
     @Test
     void ratingWithoutWorksAndScoresShouldReturn100() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
 
         assertThat(course.rating(student)).isEqualTo(100.0);
     }
 
     @Test
     void unableToCreateWorkWithMaxScoreEqual0() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         assertThatThrownBy(() -> course.addWork("work", 0, LocalDate.of(2026, 9, 12)))
                 .isInstanceOf(InvalidWorkMaxScoreException.class);
     }
 
     @Test
     void unableToUpdateWorkWithMaxScoreEqual0() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         long workNum = addWork(course, "Лабораторная 1", 20);
 
         assertThatThrownBy(() -> course.updateWorkMaxScore(workNum, 0))
@@ -100,7 +100,7 @@ public class CourseTest {
 
     @Test
     void cannotLowerWorkMaximumBelowAnExistingScore() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         long workNum = addWork(course, "Лабораторная 1", 20);
         course.score(workNum, student, 15);
 
@@ -110,7 +110,7 @@ public class CourseTest {
 
     @Test
     void unableToSetScoreWithValueGreaterThenWorkMaxScore() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         long workNum = addWork(course, "Лабораторная 1", 20);
 
         assertThatThrownBy(() -> course.score(workNum, student, 21))
@@ -119,7 +119,7 @@ public class CourseTest {
 
     @Test
     void addWorkStoresDate() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         LocalDate date = LocalDate.of(2026, 9, 12);
 
         long workNumber = course.addWork("Лабораторная 1", 20, date);
@@ -129,7 +129,7 @@ public class CourseTest {
 
     @Test
     void updateWorkDateChangesDateOfThisWork() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         LocalDate date = LocalDate.of(2026, 9, 12);
         LocalDate newDate = LocalDate.of(2026, 9, 18);
         long workNumber = course.addWork("Лабораторная 1", 20, date);
@@ -146,7 +146,7 @@ public class CourseTest {
 
     @Test
     void updateNonExistingWorkWillThrowWorkNotFoundException() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
         LocalDate newDate = LocalDate.of(2026, 9, 18);
 
         assertThatThrownBy(() -> course.updateWorkDate(40, newDate))
@@ -155,7 +155,7 @@ public class CourseTest {
 
     @Test
     void unableToCreateWorkWithNullDate() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
 
         assertThatThrownBy(() -> course.addWork("Лабораторная 1", 20, null))
                 .isInstanceOf(InvalidWorkDateException.class);
@@ -163,7 +163,7 @@ public class CourseTest {
 
     @Test
     void unableToUpdateWorkWithNullNewDate() {
-        Course course = new Course(List.of(student));
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
 
         LocalDate date = LocalDate.of(2026, 9, 12);
         long workNumber = course.addWork("Лабораторная 1", 20, date);
@@ -175,12 +175,32 @@ public class CourseTest {
     @Test
     void initialScoreShouldBe0() {
         StudentID secondStudent = new StudentID(2);
-        Course course = new Course(List.of(student, secondStudent));
+        Course course = new Course(List.of(student, secondStudent), CourseType.SEMINAR);
         LocalDate date = LocalDate.of(2026, 9, 12);
         long work = course.addWork("Лабораторная 1", 20, date);
 
         assertThat(course.getScore(work, student)).isEqualTo(0);
         assertThat(course.getScore(work, secondStudent)).isEqualTo(0);
+    }
+
+    @Test
+    void lectureCourseCannotCreateSeminarWork() {
+        Course course = new Course(List.of(student), CourseType.LECTURE);
+
+        assertThatThrownBy(() -> course.addWork("Работа", 20, LocalDate.of(2026, 9, 12)))
+                .isInstanceOf(InvalidCourseTypeException.class);
+    }
+
+    @Test
+    void courseworkAndLectureCoursesCanBeCompletedWithoutSeminarWorks() {
+        Course lecture = new Course(List.of(student), CourseType.LECTURE);
+        Course coursework = new Course(List.of(student), CourseType.COURSEWORK);
+
+        lecture.complete();
+        coursework.complete();
+
+        assertThat(lecture.isCompleted()).isTrue();
+        assertThat(coursework.isCompleted()).isTrue();
     }
 
 }

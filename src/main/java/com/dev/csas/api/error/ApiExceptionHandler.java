@@ -9,14 +9,22 @@ import com.dev.csas.control.ControlSheetException;
 import com.dev.csas.control.IncompleteControlSheetException;
 import com.dev.csas.control.InvalidControlResultException;
 import com.dev.csas.control.UnauthorizedTeacherException;
+import com.dev.csas.coursework.CourseworkSheetException;
+import com.dev.csas.coursework.CourseworkSheetNotFoundException;
+import com.dev.csas.coursework.CourseworkResultNotFoundException;
+import com.dev.csas.coursework.CourseworkSheetStudentNotFoundException;
+import com.dev.csas.coursework.IncompleteCourseworkSheetException;
+import com.dev.csas.coursework.InvalidCourseworkScoreException;
 import com.dev.csas.course.NonExistentStudentException;
 import com.dev.csas.course.CourseNotFoundException;
+import com.dev.csas.course.CourseNotCompletedException;
 import com.dev.csas.course.WorkNotFoundException;
 import com.dev.csas.course.InvalidWorkMaxScoreException;
 import com.dev.csas.course.InvalidWorkDateException;
 import com.dev.csas.course.InvalidScoreValueException;
 import com.dev.csas.course.CourseWithoutWorksException;
 import com.dev.csas.course.CourseCompletedException;
+import com.dev.csas.course.InvalidCourseTypeException;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -42,19 +50,23 @@ import java.util.stream.Collectors;
         "com.dev.csas.student",
         "com.dev.csas.teacher",
         "com.dev.csas.discipline",
-        "com.dev.csas.semester"
+        "com.dev.csas.semester",
+        "com.dev.csas.coursework"
 })
 public class ApiExceptionHandler {
 
     @ExceptionHandler({AttendanceSheetNotFoundException.class, LectureNotFoundException.class,
             NonExistentStudentException.class, com.dev.csas.control.ControlSheetNotFoundException.class,
-            CatalogNotFoundException.class, CourseNotFoundException.class, WorkNotFoundException.class})
+            CatalogNotFoundException.class, CourseNotFoundException.class, WorkNotFoundException.class,
+            CourseworkSheetNotFoundException.class, CourseworkResultNotFoundException.class,
+            CourseworkSheetStudentNotFoundException.class})
     public ResponseEntity<ApiErrorResponse> notFound(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
     @ExceptionHandler({CatalogConflictException.class, DataIntegrityViolationException.class,
-            CourseWithoutWorksException.class, CourseCompletedException.class})
+            CourseWithoutWorksException.class, CourseCompletedException.class, CourseNotCompletedException.class,
+            InvalidCourseTypeException.class})
     public ResponseEntity<ApiErrorResponse> catalogConflict(RuntimeException exception, HttpServletRequest request) {
         String message = exception instanceof DataIntegrityViolationException
                 ? "Нельзя выполнить операцию: нарушено ограничение уникальности или связи"
@@ -84,13 +96,14 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler({SheetStatusException.class, IncompleteControlSheetException.class,
-            InvalidRegisterException.class, DuplicateLectureException.class})
+            InvalidRegisterException.class, DuplicateLectureException.class, IncompleteCourseworkSheetException.class,
+            CourseworkSheetException.class})
     public ResponseEntity<ApiErrorResponse> conflict(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
     @ExceptionHandler({InvalidControlResultException.class, InvalidWorkMaxScoreException.class,
-            InvalidWorkDateException.class, InvalidScoreValueException.class})
+            InvalidWorkDateException.class, InvalidScoreValueException.class, InvalidCourseworkScoreException.class})
     public ResponseEntity<ApiErrorResponse> invalidResult(RuntimeException exception, HttpServletRequest request) {
         return error(HttpStatus.UNPROCESSABLE_CONTENT, exception.getMessage(), request);
     }

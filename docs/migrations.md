@@ -74,11 +74,14 @@ V202609091012__add_curator_to_groups.sql
 
 ## Имена таблиц и колонок
 
-Таблицы во множественном числе, `snake_case`: `students`, `groups`,
-`disciplines`, `semesters`, `teachers`, `courses`, `works`, `scores`,
-`control_sheets`, `control_results`, `attendance_sheets`, `lectures`,
-`lecture_attendance`. Колонки тоже `snake_case`: `group_id`, `max_score`,
-`seminar_teacher_id`, `lecture_teacher_id`, `admission_date`.
+Таблицы во множественном числе, `snake_case`: `users`, `teachers`, `groups`,
+`students`, `disciplines`, `semesters`, `courses`, `course_students`,
+`course_works`, `course_scores`, `control_sheets`, `control_results`,
+`control_sheet_events`, `attendance_sheets`, `lectures`, `lecture_attendance`,
+`coursework_sheets`, `coursework_results`.
+
+Колонки тоже `snake_case`: `group_id`, `max_score`, `teacher_id`, `course_type`,
+`start_semester_id`, `end_semester_id`, `admission_date`.
 
 Слова берём из [глоссария](glossary.md). Если понятия там нет — сначала
 добавляем его туда, потом пишем миграцию. Это дешевле, чем потом выяснять, что

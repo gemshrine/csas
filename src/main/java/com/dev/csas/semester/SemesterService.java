@@ -55,7 +55,7 @@ public class SemesterService {
     @Transactional
     public void delete(Long id) {
         getSemester(id);
-        if (courseRepository.existsBySemester_Id(id)) {
+        if (courseRepository.existsByStartSemester_Id(id) || courseRepository.existsByEndSemester_Id(id)) {
             throw new CatalogConflictException(
                     "Нельзя удалить семестр: есть связанные курсы"
             );
