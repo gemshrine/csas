@@ -1,11 +1,3 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5432}/${POSTGRES_DB:csas}?currentSchema=csas_dev
-  jpa:
-    properties:
-      hibernate:
-        default_schema: csas_dev
   flyway:
-    default-schema: csas_dev
-    schemas: csas_dev
-    locations: classpath:db/migration,classpath:db/dev
+    locations: classpath:db/migration,classpath:db/dev/migration

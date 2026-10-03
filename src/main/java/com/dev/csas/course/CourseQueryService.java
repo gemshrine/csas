@@ -5,6 +5,8 @@ import com.dev.csas.attendance.AttendanceSheetReadModel;
 import com.dev.csas.attendance.AttendanceSheetRepository;
 import com.dev.csas.control.ControlSheetReadModel;
 import com.dev.csas.control.entity.ControlSheetRepository;
+import com.dev.csas.coursework.CourseworkSheetReadModel;
+import com.dev.csas.coursework.CourseworkSheetRepository;
 import com.dev.csas.shared.TeacherID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,22 +22,23 @@ public class CourseQueryService {
     private final CourseRepository courses;
     private final ControlSheetRepository controls;
     private final AttendanceSheetRepository attendance;
+    private final CourseworkSheetRepository coursework;
 
     public CourseQueryService(
             CourseRepository courses,
             ControlSheetRepository controls,
-            AttendanceSheetRepository attendance
+            AttendanceSheetRepository attendance,
+            CourseworkSheetRepository coursework
     ) {
         this.courses = courses;
         this.controls = controls;
         this.attendance = attendance;
+        this.coursework = coursework;
     }
 
     @Transactional(readOnly = true)
     public List<CourseSummaryResponse> listForTeacher(TeacherID teacher) {
-        List<CourseJPAEntity> courseEntities = courses.findAllBySeminarTeacher_IdOrLectureTeacher_IdOrderByIdAsc(
-                teacher.id(), teacher.id()
-        );
+        List<CourseJPAEntity> courseEntities = courses.findAllByTeacher_IdOrderByIdAsc(teacher.id());
         return map(courseEntities, teacher.id());
     }
 
@@ -53,24 +56,36 @@ public class CourseQueryService {
                 .collect(Collectors.toMap(ControlSheetReadModel::courseId, Function.identity()));
         Map<Long, AttendanceSheetReadModel> attendanceByCourse = attendance.findCourseSheetReadModels(courseIds).stream()
                 .collect(Collectors.toMap(AttendanceSheetReadModel::courseId, Function.identity()));
+        Map<Long, CourseworkSheetReadModel> courseworkByCourse = coursework
+                .findCourseSheetReadModels(courseIds).stream()
+                .collect(Collectors.toMap(CourseworkSheetReadModel::courseId, Function.identity()));
 
         return courseEntities.stream().map(course -> {
             ControlSheetReadModel control = controlByCourse.get(course.getId());
             AttendanceSheetReadModel attendanceSheet = attendanceByCourse.get(course.getId());
-            boolean canReadControl = teacherId == null || course.getSeminarTeacher().getId().equals(teacherId);
-            boolean canReadAttendance = teacherId == null || course.getLectureTeacher().getId().equals(teacherId);
+            CourseworkSheetReadModel courseworkSheet = courseworkByCourse.get(course.getId());
+            boolean isSeminar = course.getCourseType() == CourseType.SEMINAR;
+            boolean isLecture = course.getCourseType() == CourseType.LECTURE;
+            boolean isCoursework = course.getCourseType() == CourseType.COURSEWORK;
+            boolean canReadControl = isSeminar && (teacherId == null || course.getTeacher().getId().equals(teacherId));
+            boolean canReadAttendance = isLecture && (teacherId == null || course.getTeacher().getId().equals(teacherId));
             return new CourseSummaryResponse(
                     course.getId(),
                     course.getDiscipline().getName(),
                     course.getGroup().getName(),
-                    course.getSemester().getName(),
+                    course.getStartSemester().getName(),
+                    course.getEndSemester().getName(),
+                    course.getCourseType(),
                     course.getStatus(),
                     canReadControl && control != null ? control.sheetId() : null,
                     canReadControl && control != null ? control.status() : null,
                     canReadAttendance && attendanceSheet != null ? attendanceSheet.sheetId() : null,
                     canReadAttendance && attendanceSheet != null ? attendanceSheet.status() : null,
+                    isCoursework && courseworkSheet != null ? courseworkSheet.sheetId() : null,
+                    isCoursework && courseworkSheet != null ? courseworkSheet.status() : null,
                     canReadControl,
-                    canReadAttendance
+                    canReadAttendance,
+                    isCoursework && (teacherId == null || course.getTeacher().getId().equals(teacherId))
             );
         }).toList();
     }

@@ -29,7 +29,7 @@ public class CourseApplicationService {
     @Transactional(readOnly = true)
     public CourseDetailsResponse getForTeacher(long courseId, TeacherID teacher) {
         CourseJPAEntity entity = findCourse(courseId);
-        validateSeminarTeacher(entity, teacher);
+        validateCourseTeacher(entity, teacher);
         return toResponse(entity, mapper.toDomain(entity));
     }
 
@@ -72,7 +72,7 @@ public class CourseApplicationService {
     @Transactional
     public void complete(long courseId, TeacherID teacher) {
         CourseJPAEntity entity = findCourse(courseId);
-        validateSeminarTeacher(entity, teacher);
+        validateCourseTeacher(entity, teacher);
         Course course = mapper.toDomain(entity);
         course.complete();
         persist(course, entity);
@@ -84,8 +84,14 @@ public class CourseApplicationService {
     }
 
     private void validateSeminarTeacher(CourseJPAEntity course, TeacherID teacher) {
-        if (!course.getSeminarTeacher().getId().equals(teacher.id())) {
+        if (course.getCourseType() != CourseType.SEMINAR || !course.getTeacher().getId().equals(teacher.id())) {
             throw new ActorAccessDeniedException("Операция доступна только преподавателю семинарской части курса");
+        }
+    }
+
+    private void validateCourseTeacher(CourseJPAEntity course, TeacherID teacher) {
+        if (!course.getTeacher().getId().equals(teacher.id())) {
+            throw new ActorAccessDeniedException("Нет доступа к этому курсу");
         }
     }
 
@@ -117,12 +123,15 @@ public class CourseApplicationService {
                         student.getId(),
                         student.getLastName() + " " + student.getFirstName()
                                 + (student.getPatronymic() == null ? "" : " " + student.getPatronymic()),
-                        course.rating(new StudentID(student.getId()))
+                        course.type() == CourseType.SEMINAR
+                                ? course.rating(new StudentID(student.getId()))
+                                : null
                 ))
                 .toList();
         return new CourseDetailsResponse(
                 entity.getId(), entity.getDiscipline().getName(), entity.getGroup().getName(),
-                entity.getSemester().getName(), course.status(), works, students
+                entity.getStartSemester().getName(), entity.getEndSemester().getName(),
+                course.type(), course.status(), works, students
         );
     }
 }

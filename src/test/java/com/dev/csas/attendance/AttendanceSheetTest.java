@@ -2,6 +2,7 @@ package com.dev.csas.attendance;
 
 import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.Course;
+import com.dev.csas.course.CourseType;
 import com.dev.csas.course.NonExistentStudentException;
 import com.dev.csas.shared.*;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,16 @@ public class AttendanceSheetTest {
     private static final DeanID dean = new DeanID(1);
 
     @Test
+    void cannotCreateAttendanceSheetForSeminarCourse() {
+        Course course = new Course(List.of(student), CourseType.SEMINAR, seminarTeacher);
+
+        assertThatThrownBy(() -> new AttendanceSheet(course))
+                .isInstanceOf(com.dev.csas.course.InvalidCourseTypeException.class);
+    }
+
+    @Test
     void addStudentDoesNotRewriteExisting() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
         attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "Лекция 1");
@@ -36,7 +45,7 @@ public class AttendanceSheetTest {
 
     @Test
     void seminarTeacherCannotAddLecture() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
 
@@ -46,7 +55,7 @@ public class AttendanceSheetTest {
 
     @Test
     void unableToRegisterNotBelongingStudent() {
-        Course course = new Course(List.of(student), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
         attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "Лекция 1");
@@ -57,7 +66,7 @@ public class AttendanceSheetTest {
 
     @Test
     void cannotCloseUntilAllStudentsAreRegistered() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
         attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "Лекция 1");
@@ -73,8 +82,26 @@ public class AttendanceSheetTest {
     }
 
     @Test
+    void completedCourseCanCloseAttendanceButCannotChangeMarks() {
+        Course course = new Course(List.of(student), CourseType.LECTURE, lectureTeacher);
+        AttendanceSheet attendanceSheet = new AttendanceSheet(course);
+        LectureID lectureID = new LectureID(1);
+        attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "Лекция 1");
+        attendanceSheet.register(lectureTeacher, student, AttendanceStatusEnum.PRESENT, lectureID);
+        course.complete();
+
+        assertThatThrownBy(() -> attendanceSheet.register(
+                lectureTeacher, student, AttendanceStatusEnum.ABSENT, lectureID))
+                .isInstanceOf(com.dev.csas.course.CourseCompletedException.class);
+
+        attendanceSheet.close(lectureTeacher);
+
+        assertThat(attendanceSheet.status()).isEqualTo(AttendanceSheetStatus.CLOSED);
+    }
+
+    @Test
     void cannotArchiveOpenedSheet() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
 
         assertThatThrownBy(() -> attendanceSheet.archive(dean))
@@ -84,7 +111,7 @@ public class AttendanceSheetTest {
 
     @Test
     void cannotArchiveArchivedSheet() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         attendanceSheet.close(lectureTeacher);
         attendanceSheet.archive(dean);
@@ -95,8 +122,8 @@ public class AttendanceSheetTest {
 
     @Test
     void cannotActInSheetAfterArchivingOrClosing() {
-        Course course1 = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
-        Course course2 = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course1 = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
+        Course course2 = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
 
         AttendanceSheet attendanceSheet1 = new AttendanceSheet(course1);
         AttendanceSheet attendanceSheet2 = new AttendanceSheet(course2);
@@ -121,7 +148,7 @@ public class AttendanceSheetTest {
 
     @Test
     void rejectsReadingUnknownLecture() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
 
@@ -131,7 +158,7 @@ public class AttendanceSheetTest {
 
     @Test
     void existingLectureWithoutRecordsReturnsEmptyMap() {
-        Course course = new Course(List.of(student, otherStudent), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
         attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "lab1");

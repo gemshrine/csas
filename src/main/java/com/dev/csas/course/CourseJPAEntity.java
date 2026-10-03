@@ -19,8 +19,10 @@ import com.dev.csas.student.StudentJPAEntity;
 @Table(
         name = "courses",
         uniqueConstraints = @UniqueConstraint(
-                name = "uk_courses_discipline_group_semester",
-                columnNames = {"discipline_id", "group_id", "semester_id"}
+                name = "uk_courses_discipline_group_period_type",
+                columnNames = {
+                        "discipline_id", "group_id", "start_semester_id", "end_semester_id", "course_type"
+                }
         )
 )
 @NoArgsConstructor
@@ -44,20 +46,25 @@ public class CourseJPAEntity {
     @JoinColumn(name = "group_id", nullable = false)
     private GroupJPAEntity group;
 
-    @NotNull(message = "Семестр обязателен")
+    @NotNull(message = "Семестр начала обязателен")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "semester_id", nullable = false)
-    private SemesterJPAEntity semester;
+    @JoinColumn(name = "start_semester_id", nullable = false)
+    private SemesterJPAEntity startSemester;
 
-    @NotNull(message = "Преподаватель семинарной части обязателен")
+    @NotNull(message = "Семестр окончания обязателен")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "seminar_teacher_id", nullable = false)
-    private TeacherJPAEntity seminarTeacher;
+    @JoinColumn(name = "end_semester_id", nullable = false)
+    private SemesterJPAEntity endSemester;
 
-    @NotNull(message = "Преподаватель лекционной части обязателен")
+    @NotNull(message = "Тип курса обязателен")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "course_type", nullable = false, length = 20)
+    private CourseType courseType;
+
+    @NotNull(message = "Преподаватель курса обязателен")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lecture_teacher_id", nullable = false)
-    private TeacherJPAEntity lectureTeacher;
+    @JoinColumn(name = "teacher_id", nullable = false)
+    private TeacherJPAEntity teacher;
 
     @Builder.Default
     @NotNull(message = "Состояние курса обязательно")

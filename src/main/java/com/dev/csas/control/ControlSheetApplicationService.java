@@ -6,6 +6,13 @@ import com.dev.csas.control.audit.ControlSheetEventMapper;
 import com.dev.csas.control.audit.ControlSheetEventRepository;
 import com.dev.csas.control.entity.ControlSheetJPAEntity;
 import com.dev.csas.control.entity.ControlSheetRepository;
+import com.dev.csas.course.Course;
+import com.dev.csas.course.CourseJPAEntity;
+import com.dev.csas.course.CourseMapper;
+import com.dev.csas.course.CourseNotFoundException;
+import com.dev.csas.course.CourseType;
+import com.dev.csas.error.CatalogConflictException;
+import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
@@ -25,17 +32,48 @@ public class ControlSheetApplicationService {
     private final ControlSheetEventRepository events;
     private final ControlSheetMapper mapper;
     private final ControlSheetEventMapper eventMapper;
+    private final com.dev.csas.course.CourseRepository courses;
+    private final CourseMapper courseMapper;
 
     public ControlSheetApplicationService(
             ControlSheetRepository sheets,
             ControlSheetEventRepository events,
             ControlSheetMapper mapper,
-            ControlSheetEventMapper eventMapper
+            ControlSheetEventMapper eventMapper,
+            com.dev.csas.course.CourseRepository courses,
+            CourseMapper courseMapper
     ) {
         this.sheets = sheets;
         this.events = events;
         this.mapper = mapper;
         this.eventMapper = eventMapper;
+        this.courses = courses;
+        this.courseMapper = courseMapper;
+    }
+
+    @Transactional
+    public long createForCompletedCourse(long courseId, TeacherID teacher, GradingScale gradingScale) {
+        CourseJPAEntity courseEntity = courses.findById(courseId)
+                .orElseThrow(() -> new CourseNotFoundException("Курс не найден: " + courseId));
+        if (courseEntity.getCourseType() != CourseType.SEMINAR
+                || !courseEntity.getTeacher().getId().equals(teacher.id())) {
+            throw new ActorAccessDeniedException("Зачётная ведомость может создать только преподаватель семинарного курса");
+        }
+        if (sheets.existsByCourse_Id(courseId)) {
+            throw new CatalogConflictException("Для курса уже создана зачётная ведомость");
+        }
+
+        Course course = courseMapper.toDomain(courseEntity);
+        ControlSheet sheet = new ControlSheet(course, courseEntity.getDiscipline().getControlForm(), gradingScale);
+        ControlSheetJPAEntity entity = ControlSheetJPAEntity.builder()
+                .course(courseEntity)
+                .controlForm(courseEntity.getDiscipline().getControlForm())
+                .grade5From(gradingScale.grade5From())
+                .grade4From(gradingScale.grade4From())
+                .grade3From(gradingScale.grade3From())
+                .status(sheet.status())
+                .build();
+        return sheets.saveAndFlush(entity).getId();
     }
 
     @Transactional

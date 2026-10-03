@@ -7,26 +7,25 @@ import java.util.List;
 
 public interface CourseRepository extends JpaRepository<CourseJPAEntity, Long> {
 
-    @EntityGraph(attributePaths = {"discipline", "group", "semester"})
-    List<CourseJPAEntity> findAllBySeminarTeacher_IdOrLectureTeacher_IdOrderByIdAsc(
-            Long seminarTeacherId,
-            Long lectureTeacherId
-    );
+    @EntityGraph(attributePaths = {"discipline", "group", "startSemester", "endSemester"})
+    List<CourseJPAEntity> findAllByTeacher_IdOrderByIdAsc(Long teacherId);
 
-    @EntityGraph(attributePaths = {"discipline", "group", "semester"})
+    @EntityGraph(attributePaths = {"discipline", "group", "startSemester", "endSemester"})
     List<CourseJPAEntity> findAllByOrderByIdAsc();
 
-    @EntityGraph(attributePaths = {"discipline", "group", "semester"})
+    @EntityGraph(attributePaths = {"discipline", "group", "startSemester", "endSemester"})
     List<CourseJPAEntity> findAllByStudents_IdOrderByIdAsc(Long studentId);
+
+    boolean existsByStartSemester_Id(Long semesterId);
+
+    boolean existsByEndSemester_Id(Long semesterId);
 
 
     boolean existsByGroup_Id(Long groupId);
 
     boolean existsByDiscipline_Id(Long disciplineId);
 
-    boolean existsBySemester_Id(Long semesterId);
-
-    boolean existsBySeminarTeacher_IdOrLectureTeacher_Id(Long seminarTeacherId, Long lectureTeacherId);
+    boolean existsByTeacher_Id(Long teacherId);
 
     boolean existsByStudents_Id(Long studentId);
 }

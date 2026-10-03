@@ -5,6 +5,7 @@ import com.dev.csas.control.audit.ControlEventType;
 import com.dev.csas.control.audit.ControlSheetEvent;
 import com.dev.csas.course.Course;
 import com.dev.csas.course.CourseNotCompletedException;
+import com.dev.csas.course.CourseType;
 import com.dev.csas.discipline.ControlFormEnum;
 import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.SheetStatusException;
@@ -32,6 +33,14 @@ class ControlSheetTest {
 
         assertThatThrownBy(() -> new ControlSheet(course, ControlFormEnum.EXAM, scale))
                 .isInstanceOf(CourseNotCompletedException.class);
+    }
+
+    @Test
+    void cannotCreateControlSheetForLectureCourse() {
+        Course course = new Course(List.of(student), CourseType.LECTURE, lectureTeacher);
+
+        assertThatThrownBy(() -> new ControlSheet(course, ControlFormEnum.EXAM, scale))
+                .isInstanceOf(com.dev.csas.course.InvalidCourseTypeException.class);
     }
 
     @Test
@@ -76,7 +85,7 @@ class ControlSheetTest {
 
     @Test
     void cannotCloseUntilEveryStudentHasResult() {
-        Course course = new Course(List.of(student, new StudentID(2)), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student, new StudentID(2)), CourseType.SEMINAR, seminarTeacher);
         course.addWork("Лабораторная", 100, LocalDate.of(2026, 9, 12));
         course.complete();
         ControlSheet sheet = new ControlSheet(course, ControlFormEnum.EXAM, scale);
@@ -202,7 +211,7 @@ class ControlSheetTest {
     }
 
     private Course course() {
-        Course course = new Course(List.of(student), seminarTeacher, lectureTeacher);
+        Course course = new Course(List.of(student), CourseType.SEMINAR, seminarTeacher);
         course.addWork("Лабораторная", 100, LocalDate.of(2026, 9, 12));
         return course;
     }

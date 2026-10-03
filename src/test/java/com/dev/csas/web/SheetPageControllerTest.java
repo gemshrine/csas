@@ -113,7 +113,8 @@ class SheetPageControllerTest {
     private ControlSheetDetailsResponse controlSheet() {
         return new ControlSheetDetailsResponse(
                 4,
-                new CourseHeaderResponse(3, "Базы данных", "ИСТ-21", "Осень 2026", CourseStatus.IN_PROGRESS),
+                new CourseHeaderResponse(3, "Базы данных", "ИСТ-21", "Осень 2026", "Весна 2027",
+                        com.dev.csas.course.CourseType.SEMINAR, CourseStatus.IN_PROGRESS),
                 ControlFormEnum.EXAM,
                 ControlSheetStatus.OPEN,
                 null,
@@ -124,7 +125,8 @@ class SheetPageControllerTest {
     private AttendanceSheetDetailsResponse attendanceSheet() {
         return new AttendanceSheetDetailsResponse(
                 5,
-                new CourseHeaderResponse(3, "Базы данных", "ИСТ-21", "Осень 2026", CourseStatus.IN_PROGRESS),
+                new CourseHeaderResponse(3, "Базы данных", "ИСТ-21", "Осень 2026", "Весна 2027",
+                        com.dev.csas.course.CourseType.LECTURE, CourseStatus.IN_PROGRESS),
                 AttendanceSheetStatus.OPEN,
                 List.of(),
                 List.of()

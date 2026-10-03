@@ -54,7 +54,7 @@ class TeacherServiceTest {
     @Test
     void deleteThrowsWhenAssignedToCourse() {
         when(teacherRepository.findById(2L)).thenReturn(Optional.of(teacher(2L)));
-        when(courseRepository.existsBySeminarTeacher_IdOrLectureTeacher_Id(2L, 2L)).thenReturn(true);
+        when(courseRepository.existsByTeacher_Id(2L)).thenReturn(true);
 
         assertThatThrownBy(() -> teacherService.delete(2L))
                 .isInstanceOf(CatalogConflictException.class)
@@ -65,7 +65,7 @@ class TeacherServiceTest {
     @Test
     void deleteRemovesUnusedTeacher() {
         when(teacherRepository.findById(2L)).thenReturn(Optional.of(teacher(2L)));
-        when(courseRepository.existsBySeminarTeacher_IdOrLectureTeacher_Id(2L, 2L)).thenReturn(false);
+        when(courseRepository.existsByTeacher_Id(2L)).thenReturn(false);
 
         teacherService.delete(2L);
 

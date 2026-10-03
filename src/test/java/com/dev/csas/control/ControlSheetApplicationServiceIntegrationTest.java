@@ -137,12 +137,16 @@ class ControlSheetApplicationServiceIntegrationTest {
         assertEquals(true, seminarCourses.getFirst().canReadControlSheet());
         assertEquals(false, seminarCourses.getFirst().canReadAttendanceSheet());
         assertEquals(1, lectureCourses.size());
+        assertEquals(com.dev.csas.course.CourseType.LECTURE, lectureCourses.getFirst().courseType());
         assertNull(lectureCourses.getFirst().controlSheetId());
         assertEquals(false, lectureCourses.getFirst().canReadControlSheet());
         assertEquals(true, lectureCourses.getFirst().canReadAttendanceSheet());
-        assertEquals(1, deanCourses.size());
+        assertEquals(2, deanCourses.size());
         assertEquals(true, deanCourses.getFirst().canReadControlSheet());
-        assertEquals(true, deanCourses.getFirst().canReadAttendanceSheet());
+        assertEquals(false, deanCourses.getFirst().canReadAttendanceSheet());
+        assertEquals(com.dev.csas.course.CourseType.LECTURE, deanCourses.getLast().courseType());
+        assertEquals(false, deanCourses.getLast().canReadControlSheet());
+        assertEquals(true, deanCourses.getLast().canReadAttendanceSheet());
     }
 
     private Fixture insertFixture() {
@@ -175,21 +179,32 @@ class ControlSheetApplicationServiceIntegrationTest {
                 "INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
                 "Тестовый семестр", Date.valueOf("2026-09-01"), Date.valueOf("2027-01-31")
         );
-        long courseId = insert(
+        long seminarCourseId = insert(
                 "INSERT INTO courses " +
-                        "(discipline_id, group_id, semester_id, seminar_teacher_id, lecture_teacher_id, status) " +
-                        "VALUES (?, ?, ?, ?, ?, 'COMPLETED') RETURNING id",
-                disciplineId, groupId, semesterId, seminarTeacherId, lectureTeacherId
+                        "(discipline_id, group_id, start_semester_id, end_semester_id, course_type, teacher_id, status) " +
+                        "VALUES (?, ?, ?, ?, 'SEMINAR', ?, 'COMPLETED') RETURNING id",
+                disciplineId, groupId, semesterId, semesterId, seminarTeacherId
+        );
+        long lectureCourseId = insert(
+                "INSERT INTO courses " +
+                        "(discipline_id, group_id, start_semester_id, end_semester_id, course_type, teacher_id, status) " +
+                        "VALUES (?, ?, ?, ?, 'LECTURE', ?, 'IN_PROGRESS') RETURNING id",
+                disciplineId, groupId, semesterId, semesterId, lectureTeacherId
         );
         jdbc.update(
                 "INSERT INTO course_students (course_id, student_id) VALUES (?, ?)",
-                courseId,
+                seminarCourseId,
+                studentId
+        );
+        jdbc.update(
+                "INSERT INTO course_students (course_id, student_id) VALUES (?, ?)",
+                lectureCourseId,
                 studentId
         );
         long workId = insert(
                 "INSERT INTO course_works (course_id, number, title, max_score, work_date) " +
                         "VALUES (?, ?, ?, ?, ?) RETURNING id",
-                courseId, 1, "Работа", 100, Date.valueOf("2026-10-01")
+                seminarCourseId, 1, "Работа", 100, Date.valueOf("2026-10-01")
         );
         jdbc.update(
                 "INSERT INTO course_scores (work_id, student_id, score) VALUES (?, ?, ?)",
@@ -201,7 +216,7 @@ class ControlSheetApplicationServiceIntegrationTest {
                 "INSERT INTO control_sheets " +
                         "(course_id, control_form, status, grade_5_from, grade_4_from, grade_3_from) " +
                         "VALUES (?, 'EXAM', 'OPEN', 90, 80, 70) RETURNING id",
-                courseId
+                seminarCourseId
         );
 
         return new Fixture(sheetId, studentId, seminarTeacherId, lectureTeacherId);

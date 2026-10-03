@@ -14,7 +14,9 @@ import java.util.Collection;
 
 public interface ControlSheetRepository extends JpaRepository<ControlSheetJPAEntity, Long> {
 
-    @EntityGraph(attributePaths = {"course.discipline", "course.group", "course.semester", "course.seminarTeacher"})
+    boolean existsByCourse_Id(Long courseId);
+
+    @EntityGraph(attributePaths = {"course.discipline", "course.group", "course.startSemester", "course.endSemester", "course.teacher"})
     Optional<ControlSheetJPAEntity> findDetailedById(Long id);
 
     @Query("select new com.dev.csas.control.ControlSheetReadModel(s.course.id, s.id, s.status) " +

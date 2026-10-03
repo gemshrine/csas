@@ -17,7 +17,7 @@ class CourseMapperTest {
     private final CourseMapper mapper = new CourseMapper();
 
     @Test
-    void toDomainRestoresRosterWorksScoresTeachersAndStatus() {
+    void toDomainRestoresRosterWorksScoresCourseTypeAndStatus() {
         StudentJPAEntity student = StudentJPAEntity.builder().id(7L).build();
         CourseWorkJPAEntity work = CourseWorkJPAEntity.builder()
                 .id(41L)
@@ -38,8 +38,8 @@ class CourseMapperTest {
         CourseJPAEntity entity = CourseJPAEntity.builder()
                 .id(5L)
                 .group(GroupJPAEntity.builder().id(3L).build())
-                .seminarTeacher(TeacherJPAEntity.builder().id(11L).build())
-                .lectureTeacher(TeacherJPAEntity.builder().id(12L).build())
+                .courseType(CourseType.SEMINAR)
+                .teacher(TeacherJPAEntity.builder().id(11L).build())
                 .status(CourseStatus.COMPLETED)
                 .students(new ArrayList<>(List.of(student)))
                 .works(new ArrayList<>(List.of(work)))
@@ -50,8 +50,8 @@ class CourseMapperTest {
 
         assertTrue(course.isCompleted());
         assertTrue(course.hasStudent(new StudentID(7L)));
-        assertEquals(11L, course.seminarTeacher().id());
-        assertEquals(12L, course.lectureTeacher().id());
+        assertEquals(CourseType.SEMINAR, course.type());
+        assertEquals(11L, course.teacher().id());
         assertEquals(75.0, course.rating(new StudentID(7L)));
     }
 
@@ -82,7 +82,7 @@ class CourseMapperTest {
                 .build();
         work.setCourse(target);
 
-        Course source = new Course(List.of(new StudentID(7L)));
+        Course source = new Course(List.of(new StudentID(7L)), CourseType.SEMINAR);
         source.addWork("Лабораторная обновлённая", 100, LocalDate.of(2026, 9, 2));
         source.score(1, new StudentID(7L), 90);
 

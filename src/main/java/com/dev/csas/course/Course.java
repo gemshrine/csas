@@ -13,29 +13,29 @@ public class Course {
     private final List<StudentID> studentIDList;
     private final List<Work> works = new ArrayList<>();
     private final List<Score> scores = new ArrayList<>();
-    private final TeacherID seminarTeacher;
-    private final TeacherID lectureTeacher;
+    private final CourseType type;
+    private final TeacherID teacher;
     private CourseStatus status = CourseStatus.IN_PROGRESS;
 
-    public Course(List<StudentID> studentIDList) {
-        this(studentIDList, null, null);
+    public Course(List<StudentID> studentIDList, CourseType type) {
+        this(studentIDList, type, null);
     }
 
-    public Course(List<StudentID> studentIDList, TeacherID seminarTeacher, TeacherID lectureTeacher) {
+    public Course(List<StudentID> studentIDList, CourseType type, TeacherID teacher) {
         this.studentIDList = List.copyOf(studentIDList);
-        this.seminarTeacher = seminarTeacher;
-        this.lectureTeacher = lectureTeacher;
+        this.type = Objects.requireNonNull(type);
+        this.teacher = teacher;
     }
 
     static Course reconstitute(
             List<StudentID> students,
-            TeacherID seminarTeacher,
-            TeacherID lectureTeacher,
+            CourseType type,
+            TeacherID teacher,
             CourseStatus status,
             List<Work> works,
             List<Score> scores
     ) {
-        Course course = new Course(students, seminarTeacher, lectureTeacher);
+        Course course = new Course(students, type, teacher);
         course.status = Objects.requireNonNull(status);
         course.works.addAll(works);
         course.scores.addAll(scores);
@@ -44,6 +44,7 @@ public class Course {
 
     public long addWork(String title, int maxScore, LocalDate date) {
 
+        validateSeminarCourse();
         validateInProgress();
         validateWorkMaxScore(maxScore);
         validateWorkDate(date);
@@ -59,6 +60,7 @@ public class Course {
 
     public void score(long workNumber, StudentID studentID, int earnedScore) {
 
+        validateSeminarCourse();
         validateInProgress();
         validateStudentExists(studentID);
 
@@ -78,6 +80,7 @@ public class Course {
 
     public double rating(StudentID studentID) {
 
+        validateSeminarCourse();
         validateStudentExists(studentID);
 
         double max = works.stream()
@@ -94,6 +97,7 @@ public class Course {
 
     public void updateWorkMaxScore(long workNumber, int newMax) {
 
+        validateSeminarCourse();
         validateInProgress();
         validateWorkMaxScore(newMax);
 
@@ -108,12 +112,14 @@ public class Course {
     }
 
     public void updateWorkTitle(long workNumber, String newTitle) {
+        validateSeminarCourse();
         validateInProgress();
         Work work = findWork(workNumber);
         work.updateTitle(newTitle);
     }
 
     public void updateWorkDate(long workNumber, LocalDate newDate) {
+        validateSeminarCourse();
         validateInProgress();
         validateWorkDate(newDate);
 
@@ -187,7 +193,8 @@ public class Course {
     }
 
     public void complete() {
-        if (works.isEmpty()) {
+        validateInProgress();
+        if (type == CourseType.SEMINAR && works.isEmpty()) {
             throw new CourseWithoutWorksException("Нельзя завершить курс без работ");
         }
         status = CourseStatus.COMPLETED;
@@ -201,12 +208,12 @@ public class Course {
         return status;
     }
 
-    public TeacherID seminarTeacher() {
-        return seminarTeacher;
+    public CourseType type() {
+        return type;
     }
 
-    public TeacherID lectureTeacher() {
-        return lectureTeacher;
+    public TeacherID teacher() {
+        return teacher;
     }
 
     public List<StudentID> students() {
@@ -228,6 +235,12 @@ public class Course {
     private void validateInProgress() {
         if (status != CourseStatus.IN_PROGRESS) {
             throw new CourseCompletedException("Завершённый курс нельзя изменять");
+        }
+    }
+
+    private void validateSeminarCourse() {
+        if (type != CourseType.SEMINAR) {
+            throw new InvalidCourseTypeException("Операция доступна только для семинарного курса");
         }
     }
 }
