@@ -57,8 +57,22 @@ class AuthSessionIntegrationTest {
                 "WHERE u.username LIKE 'demo-%'", Integer.class));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM students s JOIN users u ON u.id = s.user_id " +
                 "WHERE u.username = 'demo-student'", Integer.class));
-        assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM control_sheets", Integer.class));
-        assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM attendance_sheets", Integer.class));
+        assertEquals(1, jdbc.queryForObject("""
+                SELECT COUNT(*)
+                FROM control_sheets sheet
+                JOIN courses course ON course.id = sheet.course_id
+                JOIN disciplines discipline ON discipline.id = course.discipline_id
+                WHERE discipline.name = 'Демонстрационная дисциплина'
+                  AND course.course_type = 'SEMINAR'
+                """, Integer.class));
+        assertEquals(1, jdbc.queryForObject("""
+                SELECT COUNT(*)
+                FROM attendance_sheets sheet
+                JOIN courses course ON course.id = sheet.course_id
+                JOIN disciplines discipline ON discipline.id = course.discipline_id
+                WHERE discipline.name = 'Демонстрационная дисциплина'
+                  AND course.course_type = 'LECTURE'
+                """, Integer.class));
     }
 
     @Test
