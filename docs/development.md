@@ -38,6 +38,9 @@ Dev-профиль меняет данные в основной схеме `pub
 | `demo-lecture` | преподаватель лекционной части | `demo1234` |
 | `demo-student` | студент | `demo1234` |
 
+Для проверки API управления учётными записями используй `lab1-test-admin` с
+паролем `demo1234`.
+
 Миграция также создаёт учётки `lab1-test-admin`, `lab1-test-dean`,
 `lab1-test-teacher-01` … `lab1-test-teacher-10` и `lab1-test-student-01` …
 `lab1-test-student-20`. Их пароль тоже `demo1234`.
