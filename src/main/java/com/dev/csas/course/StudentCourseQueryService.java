@@ -2,6 +2,14 @@ package com.dev.csas.course;
 
 import com.dev.csas.api.course.StudentCourseDetailsResponse;
 import com.dev.csas.api.course.StudentCourseSummaryResponse;
+import com.dev.csas.api.course.StudentControlResultResponse;
+import com.dev.csas.control.ControlResult;
+import com.dev.csas.control.ControlSheet;
+import com.dev.csas.control.ControlSheetMapper;
+import com.dev.csas.control.ControlSheetStatus;
+import com.dev.csas.control.entity.ControlSheetJPAEntity;
+import com.dev.csas.control.entity.ControlSheetRepository;
+import com.dev.csas.discipline.ControlFormEnum;
 import com.dev.csas.coursework.CourseworkGrade;
 import com.dev.csas.coursework.CourseworkSheetRepository;
 import com.dev.csas.coursework.CourseworkStudentResultReadModel;
@@ -21,15 +29,21 @@ public class StudentCourseQueryService {
     private final CourseRepository courses;
     private final CourseMapper mapper;
     private final CourseworkSheetRepository courseworkSheets;
+    private final ControlSheetRepository controlSheets;
+    private final ControlSheetMapper controlSheetMapper;
 
     public StudentCourseQueryService(
             CourseRepository courses,
             CourseMapper mapper,
-            CourseworkSheetRepository courseworkSheets
+            CourseworkSheetRepository courseworkSheets,
+            ControlSheetRepository controlSheets,
+            ControlSheetMapper controlSheetMapper
     ) {
         this.courses = courses;
         this.mapper = mapper;
         this.courseworkSheets = courseworkSheets;
+        this.controlSheets = controlSheets;
+        this.controlSheetMapper = controlSheetMapper;
     }
 
     @Transactional(readOnly = true)
@@ -57,7 +71,8 @@ public class StudentCourseQueryService {
                             course.status(),
                             course.type() == CourseType.SEMINAR ? course.rating(studentId) : null,
                             courseworkScore,
-                            courseworkScore == null ? null : CourseworkGrade.fromScore(courseworkScore)
+                            courseworkScore == null ? null : CourseworkGrade.fromScore(courseworkScore),
+                            controlResult(entity.getId(), studentId)
                     );
                 })
                 .toList();
@@ -104,7 +119,42 @@ public class StudentCourseQueryService {
                 course.type() == CourseType.SEMINAR ? course.rating(studentId) : null,
                 courseworkScore,
                 courseworkScore == null ? null : CourseworkGrade.fromScore(courseworkScore),
+                controlResult(entity.getId(), studentId),
                 works
+        );
+    }
+
+    private StudentControlResultResponse controlResult(long courseId, StudentID studentId) {
+        return controlSheets.findByCourse_Id(courseId)
+                .map(entity -> toStudentControlResult(entity, studentId))
+                .orElse(null);
+    }
+
+    private StudentControlResultResponse toStudentControlResult(
+            ControlSheetJPAEntity entity,
+            StudentID studentId
+    ) {
+        ControlSheet sheet = controlSheetMapper.toDomain(entity);
+        if (sheet.status() == ControlSheetStatus.OPEN) {
+            return new StudentControlResultResponse(
+                    sheet.controlForm(), sheet.status(), null, null, null, null
+            );
+        }
+
+        ControlResult result = sheet.resultOf(studentId);
+        if (sheet.controlForm() == ControlFormEnum.CREDIT) {
+            return new StudentControlResultResponse(
+                    sheet.controlForm(), sheet.status(), null, result.passFail(), null, null
+            );
+        }
+
+        return new StudentControlResultResponse(
+                sheet.controlForm(),
+                sheet.status(),
+                result.numericScore(),
+                null,
+                sheet.finalScore(studentId),
+                sheet.finalGrade(studentId)
         );
     }
 }

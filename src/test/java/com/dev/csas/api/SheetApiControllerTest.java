@@ -211,12 +211,23 @@ class SheetApiControllerTest {
                 new StudentCourseDetailsResponse(3, "Базы данных", "ИВТ-301", "Осень 2026", "Весна 2027",
                         com.dev.csas.course.CourseType.SEMINAR, com.dev.csas.course.CourseStatus.IN_PROGRESS, 90.0,
                         null, null,
+                        new com.dev.csas.api.course.StudentControlResultResponse(
+                                com.dev.csas.discipline.ControlFormEnum.EXAM,
+                                com.dev.csas.control.ControlSheetStatus.CLOSED,
+                                88,
+                                null,
+                                89.0,
+                                5
+                        ),
                         java.util.List.of(new StudentCourseDetailsResponse.WorkResult(1, "Лабораторная", 20,
                                 java.time.LocalDate.parse("2026-10-01"), 18))));
 
         mvc.perform(get("/api/me/courses/3"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rating").value(90.0))
+                .andExpect(jsonPath("$.controlResult.numericScore").value(88))
+                .andExpect(jsonPath("$.controlResult.finalScore").value(89.0))
+                .andExpect(jsonPath("$.controlResult.finalGrade").value(5))
                 .andExpect(jsonPath("$.works[0].score").value(18))
                 .andExpect(jsonPath("$.studentId").doesNotExist());
 

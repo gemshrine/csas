@@ -6,6 +6,8 @@ public record ControlStudentResultResponse(
         long studentId,
         String studentName,
         Integer numericScore,
-        PassFail passFail
+        PassFail passFail,
+        Double finalScore,
+        Integer finalGrade
 ) {
 }

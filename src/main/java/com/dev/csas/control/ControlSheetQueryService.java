@@ -7,7 +7,9 @@ import com.dev.csas.api.control.GradingScaleResponse;
 import com.dev.csas.control.entity.ControlSheetJPAEntity;
 import com.dev.csas.control.entity.ControlSheetRepository;
 import com.dev.csas.course.CourseType;
+import com.dev.csas.discipline.ControlFormEnum;
 import com.dev.csas.security.ActorAccessDeniedException;
+import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
 import com.dev.csas.student.StudentReadModel;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 public class ControlSheetQueryService {
 
     private final ControlSheetRepository sheets;
+    private final ControlSheetMapper mapper;
 
-    public ControlSheetQueryService(ControlSheetRepository sheets) {
+    public ControlSheetQueryService(ControlSheetRepository sheets, ControlSheetMapper mapper) {
         this.sheets = sheets;
+        this.mapper = mapper;
     }
 
     @Transactional(readOnly = true)
@@ -47,10 +51,11 @@ public class ControlSheetQueryService {
     }
 
     private ControlSheetDetailsResponse toResponse(ControlSheetJPAEntity sheet) {
+        ControlSheet domainSheet = mapper.toDomain(sheet);
         Map<Long, ControlResultReadModel> results = sheets.findResultReadModelsBySheetId(sheet.getId()).stream()
                 .collect(Collectors.toMap(ControlResultReadModel::studentId, Function.identity()));
         var students = sheets.findStudentReadModelsBySheetId(sheet.getId()).stream()
-                .map(student -> toStudentResponse(student, results.get(student.id())))
+                .map(student -> toStudentResponse(student, results.get(student.id()), domainSheet))
                 .toList();
         var course = sheet.getCourse();
 
@@ -72,12 +77,22 @@ public class ControlSheetQueryService {
         );
     }
 
-    private ControlStudentResultResponse toStudentResponse(StudentReadModel student, ControlResultReadModel result) {
+    private ControlStudentResultResponse toStudentResponse(
+            StudentReadModel student,
+            ControlResultReadModel result,
+            ControlSheet domainSheet
+    ) {
+        StudentID studentId = new StudentID(student.id());
+        boolean hasFinalNumericResult = result != null
+                && domainSheet.status() != ControlSheetStatus.OPEN
+                && domainSheet.controlForm() != ControlFormEnum.CREDIT;
         return new ControlStudentResultResponse(
                 student.id(),
                 student.displayName(),
                 result == null ? null : result.numericScore(),
-                result == null ? null : result.passFail()
+                result == null ? null : result.passFail(),
+                hasFinalNumericResult ? domainSheet.finalScore(studentId) : null,
+                hasFinalNumericResult ? domainSheet.finalGrade(studentId) : null
         );
     }
 }

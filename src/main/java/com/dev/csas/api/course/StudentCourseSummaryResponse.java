@@ -14,6 +14,7 @@ public record StudentCourseSummaryResponse(
         CourseStatus status,
         Double rating,
         Integer courseworkScore,
-        CourseworkGrade courseworkGrade
+        CourseworkGrade courseworkGrade,
+        StudentControlResultResponse controlResult
 ) {
 }

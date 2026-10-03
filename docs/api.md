@@ -263,7 +263,8 @@ curl -X DELETE http://localhost:8080/api/groups/1
     "status": "IN_PROGRESS",
     "rating": 90.0,
     "courseworkScore": null,
-    "courseworkGrade": null
+    "courseworkGrade": null,
+    "controlResult": null
   }
 ]
 ```
@@ -286,6 +287,14 @@ curl -X DELETE http://localhost:8080/api/groups/1
   "rating": 90.0,
   "courseworkScore": null,
   "courseworkGrade": null,
+  "controlResult": {
+    "controlForm": "EXAM",
+    "sheetStatus": "CLOSED",
+    "numericScore": 88,
+    "passFail": null,
+    "finalScore": 89.0,
+    "finalGrade": 5
+  },
   "works": [
     {
       "number": 1,
@@ -300,7 +309,11 @@ curl -X DELETE http://localhost:8080/api/groups/1
 
 Для курса типа `COURSEWORK` личный балл и вычисленная оценка возвращаются в
 `courseworkScore` и `courseworkGrade`; рейтинг и список работ семинарного курса
-для него отсутствуют.
+для него отсутствуют. Если для семинарного курса есть зачётная ведомость,
+`controlResult` содержит результат контроля и итог по дисциплине. Пока ведомость
+открыта, студент видит её форму и состояние, но поля результата остаются пустыми.
+Для обычного зачёта заполняется `passFail`; для экзамена и дифференцированного
+зачёта возвращаются балл контроля, рассчитанный итоговый балл и оценка.
 
 ## Чтение курсов и ведомостей
 
@@ -481,11 +494,19 @@ curl -X DELETE http://localhost:8080/api/groups/1
       "studentId": 21,
       "studentName": "Иванов Иван Иванович",
       "numericScore": null,
-      "passFail": null
+      "passFail": null,
+      "finalScore": null,
+      "finalGrade": null
     }
   ]
 }
 ```
+
+Для закрытой ведомости в строке студента также возвращаются `finalScore` и
+`finalGrade`. Они заполняются для экзамена и дифференцированного зачёта по
+формуле `(рейтинг семинарного курса + балл контроля) / 2`, с округлением вниз
+при переводе в оценку. Для обычного зачёта итогом остаётся `passFail`, а
+числовые итоговые поля пусты. В открытой ведомости итоговые поля всегда пусты.
 
 ### Получить ведомость посещаемости
 
