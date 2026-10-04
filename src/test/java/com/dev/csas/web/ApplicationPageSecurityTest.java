@@ -1,28 +1,39 @@
 package com.dev.csas.web;
 
+import com.dev.csas.api.course.CourseDetailsResponse;
 import com.dev.csas.course.CourseApplicationService;
 import com.dev.csas.course.CourseQueryService;
+import com.dev.csas.course.CourseStatus;
+import com.dev.csas.course.CourseType;
 import com.dev.csas.course.StudentCourseQueryService;
 import com.dev.csas.discipline.DisciplineService;
 import com.dev.csas.group.GroupService;
 import com.dev.csas.security.CurrentActorResolver;
 import com.dev.csas.security.SecurityConfiguration;
 import com.dev.csas.semester.SemesterService;
+import com.dev.csas.shared.DeanID;
 import com.dev.csas.student.StudentService;
 import com.dev.csas.teacher.TeacherService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest({ApplicationPageController.class, CatalogPageController.class})
 @Import(SecurityConfiguration.class)
@@ -83,6 +94,42 @@ class ApplicationPageSecurityTest {
     @WithMockUser(username = "teacher", roles = "TEACHER")
     void deniesTeacherFromStudentCoursePages() throws Exception {
         mvc.perform(get("/me/courses"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deanCanReopenCourseFromBrowser() throws Exception {
+        when(actors.dean(any(Authentication.class))).thenReturn(new DeanID(8));
+
+        mvc.perform(post("/courses/3/reopen").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/courses/3"));
+
+        verify(courseDetails).reopenInNextSemester(3, new DeanID(8));
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void completedCoursePageShowsReopenActionWhenNextSemesterExists() throws Exception {
+        when(actors.dean(any(Authentication.class))).thenReturn(new DeanID(8));
+        when(courseDetails.getForDean(3)).thenReturn(new CourseDetailsResponse(
+                3, "Дисциплина", "Группа", "Семестр 1", "Семестр 2", CourseType.SEMINAR,
+                CourseStatus.COMPLETED, List.of(), List.of()
+        ));
+        when(courseDetails.canReopenInNextSemester(3)).thenReturn(true);
+
+        mvc.perform(get("/courses/3"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "Переоткрыть в следующем семестре"
+                )));
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void deniesTeacherFromReopeningCourseFromBrowser() throws Exception {
+        mvc.perform(post("/courses/3/reopen").with(csrf()))
                 .andExpect(status().isForbidden());
     }
 

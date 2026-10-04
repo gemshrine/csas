@@ -64,6 +64,30 @@ class DevTestDataMigrationIntegrationTest {
                       AND group_id IN (SELECT id FROM groups WHERE name LIKE 'TEST-%')
                 )
                 """));
+        assertEquals(5, count(jdbc, """
+                SELECT COUNT(*)
+                FROM courses
+                WHERE course_type = 'SEMINAR'
+                  AND status = 'IN_PROGRESS'
+                  AND group_id IN (SELECT id FROM groups WHERE name LIKE 'TEST-%')
+                """));
+        assertEquals(10, count(jdbc, """
+                SELECT COUNT(*)
+                FROM courses
+                WHERE course_type = 'SEMINAR'
+                  AND status = 'COMPLETED'
+                  AND group_id IN (SELECT id FROM groups WHERE name LIKE 'TEST-%')
+                """));
+        assertEquals(5, count(jdbc, """
+                SELECT COUNT(*) FROM (
+                    SELECT group_id
+                    FROM courses
+                    WHERE course_type = 'SEMINAR'
+                      AND status = 'IN_PROGRESS'
+                      AND group_id IN (SELECT id FROM groups WHERE name LIKE 'TEST-%')
+                    GROUP BY group_id
+                ) open_courses_per_group
+                """));
         assertEquals(60, count(jdbc, """
                 SELECT COUNT(*)
                 FROM coursework_results

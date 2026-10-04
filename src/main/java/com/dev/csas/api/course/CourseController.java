@@ -78,6 +78,16 @@ public class CourseController {
         courses.complete(courseId, actors.teacher(authentication));
     }
 
+    @PostMapping("/reopen")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void reopen(
+            @PathVariable long courseId,
+            @Valid @RequestBody CourseReopenRequest request,
+            Authentication authentication
+    ) {
+        courses.reopen(courseId, actors.dean(authentication), request.semesterId());
+    }
+
     public record CourseWorkCreatedResponse(long workNumber) {
     }
 

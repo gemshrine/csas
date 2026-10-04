@@ -8,18 +8,22 @@ import com.dev.csas.coursework.CourseworkSheetRepository;
 import com.dev.csas.coursework.CourseworkGrade;
 import com.dev.csas.control.ControlSheetApplicationService;
 import com.dev.csas.control.GradingScale;
+import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.security.ActorAccessDeniedException;
+import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
-import com.dev.csas.shared.DeanID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -75,6 +79,9 @@ class CourseApplicationServiceIntegrationTest {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @MockitoBean
+    private FindByIndexNameSessionRepository<? extends Session> sessions;
+
     @Test
     void addsWorkScoresStudentAndCalculatesRating() {
         Fixture fixture = insertFixture();
@@ -119,6 +126,49 @@ class CourseApplicationServiceIntegrationTest {
                 fixture.seminarCourseId(), teacher, new GradingScale(85, 70, 50));
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM control_sheets WHERE id = ? " +
                 "AND control_form = 'EXAM' AND grade_5_from = 85", Integer.class, controlSheetId));
+    }
+
+    @Test
+    void deanCanReopenCompletedCourseInNextSemesterAndExistingScoresRemain() {
+        Fixture fixture = insertFixture();
+        TeacherID teacher = new TeacherID(fixture.seminarTeacherId());
+        long workNumber = service.addWork(fixture.seminarCourseId(), teacher,
+                new CourseWorkRequest("Работа", 20, Date.valueOf("2026-10-10").toLocalDate()));
+        service.enterScore(fixture.seminarCourseId(), workNumber, fixture.studentId(), teacher, 12);
+        service.complete(fixture.seminarCourseId(), teacher);
+        insert(
+                "INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
+                "API test next semester", Date.valueOf("2027-02-01"), Date.valueOf("2027-06-30"));
+
+        assertTrue(service.canReopenInNextSemester(fixture.seminarCourseId()));
+        service.reopenInNextSemester(fixture.seminarCourseId(), new DeanID(8));
+        entityManager.flush();
+
+        var reopened = service.getForTeacher(fixture.seminarCourseId(), teacher);
+        assertEquals(CourseStatus.IN_PROGRESS, reopened.status());
+        assertEquals("API test next semester", reopened.endSemesterName());
+        assertEquals(12, reopened.works().getFirst().scores().getFirst().score());
+
+        service.enterScore(fixture.seminarCourseId(), workNumber, fixture.studentId(), teacher, 18);
+        assertEquals(18, service.getForTeacher(fixture.seminarCourseId(), teacher)
+                .works().getFirst().scores().getFirst().score());
+    }
+
+    @Test
+    void cannotReopenCourseInSemesterOtherThanTheNextOne() {
+        Fixture fixture = insertFixture();
+        TeacherID teacher = new TeacherID(fixture.seminarTeacherId());
+        service.addWork(fixture.seminarCourseId(), teacher,
+                new CourseWorkRequest("Работа", 20, Date.valueOf("2026-10-10").toLocalDate()));
+        service.complete(fixture.seminarCourseId(), teacher);
+        insert("INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
+                "API test next semester", Date.valueOf("2027-02-01"), Date.valueOf("2027-06-30"));
+        long laterSemesterId = insert(
+                "INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
+                "API test later semester", Date.valueOf("2027-09-01"), Date.valueOf("2028-01-31"));
+
+        assertThrows(CatalogBadRequestException.class,
+                () -> service.reopen(fixture.seminarCourseId(), new DeanID(8), laterSemesterId));
     }
 
     @Test
