@@ -19,8 +19,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest({ApplicationPageController.class, CatalogPageController.class})
 @Import(SecurityConfiguration.class)
@@ -81,6 +83,21 @@ class ApplicationPageSecurityTest {
     @WithMockUser(username = "teacher", roles = "TEACHER")
     void deniesTeacherFromStudentCoursePages() throws Exception {
         mvc.perform(get("/me/courses"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void browserLogoutRedirectsToLogin() throws Exception {
+        mvc.perform(post("/logout").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?logout"));
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void browserLogoutRequiresCsrfToken() throws Exception {
+        mvc.perform(post("/logout"))
                 .andExpect(status().isForbidden());
     }
 }

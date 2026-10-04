@@ -143,6 +143,9 @@ public class SecurityConfiguration {
                                 "/semesters/**"
                         ).hasRole("DEAN")
                         .anyRequest().authenticated());
+        http.logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout"));
         return http.build();
     }
 
