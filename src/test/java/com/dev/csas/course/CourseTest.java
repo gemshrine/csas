@@ -1,5 +1,6 @@
 package com.dev.csas.course;
 
+import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.StudentID;
 
 import org.junit.jupiter.api.Test;
@@ -201,6 +202,37 @@ public class CourseTest {
 
         assertThat(lecture.isCompleted()).isTrue();
         assertThat(coursework.isCompleted()).isTrue();
+    }
+
+    @Test
+    void deanCanReopenCompletedCourseAndTeacherCanChangeItAgain() {
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
+        long work = addWork(course, "Лабораторная", 20);
+        course.complete();
+
+        course.reopen(new DeanID(8));
+        course.score(work, student, 15);
+
+        assertThat(course.status()).isEqualTo(CourseStatus.IN_PROGRESS);
+        assertThat(course.getScore(work, student)).isEqualTo(15);
+    }
+
+    @Test
+    void cannotReopenCourseThatIsNotCompleted() {
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
+
+        assertThatThrownBy(() -> course.reopen(new DeanID(8)))
+                .isInstanceOf(CourseNotCompletedException.class);
+    }
+
+    @Test
+    void cannotReopenCourseWithoutDean() {
+        Course course = new Course(List.of(student), CourseType.SEMINAR);
+        addWork(course, "Лабораторная", 20);
+        course.complete();
+
+        assertThatThrownBy(() -> course.reopen(null))
+                .isInstanceOf(NullPointerException.class);
     }
 
 }

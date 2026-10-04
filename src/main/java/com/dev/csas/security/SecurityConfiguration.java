@@ -71,6 +71,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/me/courses", "/api/me/courses/*").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.GET, "/api/courses").hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers(HttpMethod.POST, "/api/courses").hasRole("DEAN")
+                        .requestMatchers(HttpMethod.POST, "/api/courses/*/reopen").hasRole("DEAN")
                         .requestMatchers(HttpMethod.POST, "/api/courses/*/control-sheet").hasRole("TEACHER")
                         .requestMatchers(HttpMethod.GET, "/api/courses/*").hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers("/api/courses/*/works", "/api/courses/*/works/*",

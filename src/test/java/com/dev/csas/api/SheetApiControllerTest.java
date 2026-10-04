@@ -151,6 +151,29 @@ class SheetApiControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deanCanReopenCourseInNextSemester() throws Exception {
+        when(actors.dean(any())).thenReturn(new DeanID(8));
+
+        mvc.perform(post("/api/courses/3/reopen").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"semesterId\":4}"))
+                .andExpect(status().isNoContent());
+
+        verify(courseApplication).reopen(3, new DeanID(8), 4);
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void deniesTeacherFromReopeningCourse() throws Exception {
+        mvc.perform(post("/api/courses/3/reopen").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"semesterId\":4}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.status").value(403));
+    }
+
+    @Test
     @WithMockUser(username = "teacher", roles = "TEACHER")
     void seminarTeacherCanCreateControlSheetWithGradingScale() throws Exception {
         when(actors.teacher(any())).thenReturn(new TeacherID(12));

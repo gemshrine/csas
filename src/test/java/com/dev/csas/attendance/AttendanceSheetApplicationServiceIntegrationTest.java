@@ -15,8 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -36,6 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 )
 @Transactional
 class AttendanceSheetApplicationServiceIntegrationTest {
+
+    @MockitoBean
+    private FindByIndexNameSessionRepository<? extends Session> sessions;
 
     @Container
     private static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17")

@@ -1,5 +1,6 @@
 package com.dev.csas.course;
 
+import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
 
@@ -198,6 +199,14 @@ public class Course {
             throw new CourseWithoutWorksException("Нельзя завершить курс без работ");
         }
         status = CourseStatus.COMPLETED;
+    }
+
+    public void reopen(DeanID dean) {
+        Objects.requireNonNull(dean, "Деканат обязателен");
+        if (status != CourseStatus.COMPLETED) {
+            throw new CourseNotCompletedException("Переоткрыть можно только завершённый курс");
+        }
+        status = CourseStatus.IN_PROGRESS;
     }
 
     public boolean isCompleted() {
