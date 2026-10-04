@@ -20,6 +20,7 @@
     <button id="logout" type="button" hidden>Выйти</button>
     <ul id="courses"></ul>
 </main>
+<script src="/api-client.js"></script>
 <script>
     const loginForm = document.getElementById('login-form');
     const message = document.getElementById('message');
@@ -27,21 +28,8 @@
     const refreshButton = document.getElementById('refresh');
     const logoutButton = document.getElementById('logout');
 
-    async function csrf() {
-        const response = await fetch('/api/auth/csrf', {credentials: 'same-origin'});
-        if (!response.ok) {
-            throw new Error(`Не удалось получить CSRF-токен: HTTP ${response.status}`);
-        }
-        return response.json();
-    }
-
     async function api(path, options = {}) {
-        const response = await fetch(path, {credentials: 'same-origin', ...options});
-        const body = await response.json().catch(() => null);
-        if (!response.ok) {
-            throw new Error(body?.message ?? `Ошибка HTTP ${response.status}`);
-        }
-        return body;
+        return CsasApi.request(path, options);
     }
 
     function showSignedIn(user) {
@@ -88,14 +76,12 @@
         event.preventDefault();
         message.textContent = 'Выполняется вход…';
         try {
-            const token = await csrf();
             const user = await api('/api/auth/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', [token.headerName]: token.token},
-                body: JSON.stringify({
+                json: {
                     username: document.getElementById('username').value,
                     password: document.getElementById('password').value
-                })
+                }
             });
             showSignedIn(user);
             await loadCourses();
@@ -114,11 +100,7 @@
 
     logoutButton.addEventListener('click', async () => {
         try {
-            const token = await csrf();
-            await api('/api/auth/logout', {
-                method: 'POST',
-                headers: {[token.headerName]: token.token}
-            });
+            await api('/api/auth/logout', {method: 'POST'});
             coursesList.replaceChildren();
             refreshButton.hidden = true;
             logoutButton.hidden = true;

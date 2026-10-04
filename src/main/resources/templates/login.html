@@ -69,17 +69,10 @@
     </div>
 </div>
 
+<script src="/api-client.js"></script>
 <script>
     const loginForm = document.getElementById('login-form');
     const loginMessage = document.getElementById('login-message');
-
-    async function getCsrfToken() {
-        const response = await fetch('/api/auth/csrf', {credentials: 'same-origin'});
-        if (!response.ok) {
-            throw new Error('Не удалось начать вход. Попробуйте обновить страницу.');
-        }
-        return response.json();
-    }
 
     function destinationFor(user) {
         const requestedUrl = new URLSearchParams(window.location.search).get('returnUrl');
@@ -98,6 +91,9 @@
         if (user.role === 'TEACHER' || user.role === 'DEAN') {
             return '/courses';
         }
+        if (user.role === 'ADMIN') {
+            return '/admin/users';
+        }
         return null;
     }
 
@@ -105,23 +101,13 @@
         event.preventDefault();
         loginMessage.textContent = 'Выполняется вход…';
         try {
-            const token = await getCsrfToken();
-            const response = await fetch('/api/auth/login', {
+            const user = await CsasApi.request('/api/auth/login', {
                 method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [token.headerName]: token.token
-                },
-                body: JSON.stringify({
+                json: {
                     username: document.getElementById('username').value,
                     password: document.getElementById('password').value
-                })
+                }
             });
-            const user = await response.json();
-            if (!response.ok) {
-                throw new Error(user.message || 'Не удалось войти. Проверьте логин и пароль.');
-            }
             const destination = destinationFor(user);
             if (destination) {
                 window.location.assign(destination);
