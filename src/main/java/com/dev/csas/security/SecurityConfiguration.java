@@ -54,6 +54,13 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                         .requestMatchers("/api/admin/users", "/api/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/reports/students/me/**").hasRole("STUDENT")
+                        .requestMatchers("/api/reports/students/*/**").hasAnyRole("STUDENT", "DEAN")
+                        .requestMatchers("/api/reports/groups/**", "/api/reports/debtors.xlsx",
+                                "/api/reports/statistics.xlsx").hasRole("DEAN")
+                        .requestMatchers("/api/reports/courses/*/xlsx", "/api/reports/attendance-sheets/*/xlsx",
+                                "/api/reports/coursework-sheets/*/xlsx").hasAnyRole("TEACHER", "DEAN")
+                        .requestMatchers("/api/reports/**").authenticated()
                         .requestMatchers(
                                 "/api/groups/**",
                                 "/api/students/**",
