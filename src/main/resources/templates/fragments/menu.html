@@ -49,7 +49,9 @@
             <span class="user-name">Иван Петров</span>
             <span class="user-role">Преподаватель</span>
         </div>
-        <a href="index.html" class="logout-btn" title="Выйти">🚪</a>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="logout-btn" title="Выйти" aria-label="Выйти">🚪</button>
+        </form>
     </div>
 </aside>
 
