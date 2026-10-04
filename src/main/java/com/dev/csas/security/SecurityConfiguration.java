@@ -134,6 +134,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
                         .permitAll()
                         .requestMatchers("/me/courses", "/me/courses/**").hasRole("STUDENT")
+                        .requestMatchers(HttpMethod.POST, "/courses/*/reopen").hasRole("DEAN")
                         .requestMatchers("/courses/**", "/control-sheets/**", "/attendance-sheets/**")
                         .hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers(

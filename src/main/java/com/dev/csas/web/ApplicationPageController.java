@@ -5,6 +5,7 @@ import com.dev.csas.api.course.StudentCourseDetailsResponse;
 import com.dev.csas.api.course.StudentCourseSummaryResponse;
 import com.dev.csas.course.CourseApplicationService;
 import com.dev.csas.course.CourseQueryService;
+import com.dev.csas.course.CourseStatus;
 import com.dev.csas.course.StudentCourseQueryService;
 import com.dev.csas.security.CurrentActorResolver;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -51,10 +53,21 @@ public class ApplicationPageController {
 
     @GetMapping("/courses/{courseId}")
     public String course(@PathVariable long courseId, Authentication authentication, Model model) {
-        model.addAttribute("course", isDean(authentication)
+        boolean dean = isDean(authentication);
+        var course = dean
                 ? courseDetails.getForDean(courseId)
-                : courseDetails.getForTeacher(courseId, actors.teacher(authentication)));
+                : courseDetails.getForTeacher(courseId, actors.teacher(authentication));
+        model.addAttribute("course", course);
+        model.addAttribute("canReopen", dean
+                && course.status() == CourseStatus.COMPLETED
+                && courseDetails.canReopenInNextSemester(courseId));
         return "course";
+    }
+
+    @PostMapping("/courses/{courseId}/reopen")
+    public String reopenCourse(@PathVariable long courseId, Authentication authentication) {
+        courseDetails.reopenInNextSemester(courseId, actors.dean(authentication));
+        return "redirect:/courses/" + courseId;
     }
 
     @GetMapping("/me/courses")

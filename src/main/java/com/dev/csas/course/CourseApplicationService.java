@@ -8,6 +8,7 @@ import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
+import com.dev.csas.semester.SemesterJPAEntity;
 import com.dev.csas.semester.SemesterRepository;
 import com.dev.csas.student.StudentJPAEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -96,8 +98,7 @@ public class CourseApplicationService {
 
         var semester = semesters.findById(semesterId)
                 .orElseThrow(() -> CatalogNotFoundException.semester(semesterId));
-        var nextSemester = semesters.findFirstByStartDateAfterOrderByStartDateAsc(
-                        entity.getEndSemester().getEndDate())
+        var nextSemester = nextSemester(entity)
                 .orElseThrow(() -> new CatalogBadRequestException(
                         "Для курса не настроен следующий семестр пересдачи"
                 ));
@@ -109,9 +110,35 @@ public class CourseApplicationService {
         persist(course, entity);
     }
 
+    @Transactional
+    public void reopenInNextSemester(long courseId, DeanID dean) {
+        CourseJPAEntity entity = findCourse(courseId);
+        Course course = mapper.toDomain(entity);
+        course.reopen(dean);
+
+        SemesterJPAEntity semester = nextSemester(entity)
+                .orElseThrow(() -> new CatalogBadRequestException(
+                        "Для курса не настроен следующий семестр пересдачи"
+                ));
+        entity.setEndSemester(semester);
+        persist(course, entity);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean canReopenInNextSemester(long courseId) {
+        CourseJPAEntity entity = findCourse(courseId);
+        return entity.getStatus() == CourseStatus.COMPLETED && nextSemester(entity).isPresent();
+    }
+
     private CourseJPAEntity findCourse(long courseId) {
         return courses.findById(courseId)
                 .orElseThrow(() -> new CourseNotFoundException("Курс не найден: " + courseId));
+    }
+
+    private Optional<SemesterJPAEntity> nextSemester(CourseJPAEntity course) {
+        return semesters.findFirstByStartDateAfterOrderByStartDateAsc(
+                course.getEndSemester().getEndDate()
+        );
     }
 
     private void validateSeminarTeacher(CourseJPAEntity course, TeacherID teacher) {

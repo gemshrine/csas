@@ -136,11 +136,12 @@ class CourseApplicationServiceIntegrationTest {
                 new CourseWorkRequest("Работа", 20, Date.valueOf("2026-10-10").toLocalDate()));
         service.enterScore(fixture.seminarCourseId(), workNumber, fixture.studentId(), teacher, 12);
         service.complete(fixture.seminarCourseId(), teacher);
-        long nextSemesterId = insert(
+        insert(
                 "INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
                 "API test next semester", Date.valueOf("2027-02-01"), Date.valueOf("2027-06-30"));
 
-        service.reopen(fixture.seminarCourseId(), new DeanID(8), nextSemesterId);
+        assertTrue(service.canReopenInNextSemester(fixture.seminarCourseId()));
+        service.reopenInNextSemester(fixture.seminarCourseId(), new DeanID(8));
         entityManager.flush();
 
         var reopened = service.getForTeacher(fixture.seminarCourseId(), teacher);
