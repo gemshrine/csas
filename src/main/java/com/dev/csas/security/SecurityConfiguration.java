@@ -131,7 +131,9 @@ public class SecurityConfiguration {
                             response.sendRedirect("/login?returnUrl=" + encodedReturnUrl);
                         }))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error")
+                        .requestMatchers(
+                                "/login", "/api-client.js", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/error"
+                        )
                         .permitAll()
                         .requestMatchers("/me/courses", "/me/courses/**").hasRole("STUDENT")
                         .requestMatchers(HttpMethod.POST, "/courses/*/reopen").hasRole("DEAN")

@@ -77,6 +77,13 @@ class ApplicationPageSecurityTest {
     }
 
     @Test
+    void servesApiClientScriptToUnauthenticatedUsers() throws Exception {
+        mvc.perform(get("/api-client.js"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("window.CsasApi")));
+    }
+
+    @Test
     @WithMockUser(username = "student", roles = "STUDENT")
     void deniesStudentFromTeacherCourseList() throws Exception {
         mvc.perform(get("/courses"))

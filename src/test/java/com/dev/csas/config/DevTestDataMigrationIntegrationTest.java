@@ -2,8 +2,10 @@ package com.dev.csas.config;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -22,17 +24,43 @@ class DevTestDataMigrationIntegrationTest {
             .withPassword("csas");
 
     @Test
-    void seedsTheMinimumDatasetRequiredByTheSpecification() {
+    void seedsTestDataWithoutDuplicatingExistingDemoData() {
+        Flyway.configure()
+                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
+                .locations("classpath:db/migration")
+                .load()
+                .migrate();
+
+        DataSource dataSource = new DriverManagerDataSource(
+                postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+        new ResourceDatabasePopulator(new ClassPathResource("db/dev/demo-data.sql")).execute(dataSource);
+        new ResourceDatabasePopulator(new ClassPathResource("db/dev/coursework-demo-data.sql")).execute(dataSource);
+
         Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration", "classpath:db/dev/migration")
                 .load()
                 .migrate();
 
-        DataSource dataSource = new DriverManagerDataSource(
-                postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
 
+        assertEquals(1, count(jdbc, """
+                SELECT COUNT(*) FROM course_scores
+                WHERE student_id = (SELECT id FROM students WHERE record_book_number = 'DEMO0001')
+                """));
+        assertEquals(1, count(jdbc, """
+                SELECT COUNT(*) FROM control_results
+                WHERE student_id = (SELECT id FROM students WHERE record_book_number = 'DEMO0001')
+                """));
+        assertEquals(1, count(jdbc, "SELECT COUNT(*) FROM lectures WHERE title = 'Вводная лекция'"));
+        assertEquals(1, count(jdbc, """
+                SELECT COUNT(*) FROM lecture_attendance
+                WHERE student_id = (SELECT id FROM students WHERE record_book_number = 'DEMO0001')
+                """));
+        assertEquals(1, count(jdbc, """
+                SELECT COUNT(*) FROM coursework_results
+                WHERE student_id = (SELECT id FROM students WHERE record_book_number = 'DEMO0001')
+                """));
         assertEquals(20, count(jdbc, "SELECT COUNT(*) FROM students WHERE record_book_number LIKE 'TST%'"));
         assertEquals(5, count(jdbc, "SELECT COUNT(*) FROM groups WHERE name LIKE 'TEST-%'"));
         assertEquals(15, count(jdbc, "SELECT COUNT(*) FROM disciplines WHERE name LIKE 'Тестовая дисциплина %'"));
