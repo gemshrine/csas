@@ -140,7 +140,10 @@ SELECT course_works.id,
        course_students.student_id,
        (course_students.student_id + course_works.number * 3) % (course_works.max_score + 1)
 FROM course_works
-JOIN course_students ON course_students.course_id = course_works.course_id;
+JOIN course_students ON course_students.course_id = course_works.course_id
+JOIN courses ON courses.id = course_works.course_id
+JOIN groups ON groups.id = courses.group_id
+WHERE groups.name LIKE 'TEST-%';
 
 INSERT INTO control_sheets (course_id, control_form, status, grade_5_from, grade_4_from, grade_3_from)
 SELECT courses.id, disciplines.control_form, 'OPEN', 85, 70, 50
@@ -161,7 +164,9 @@ SELECT control_sheets.id,
        END
 FROM control_sheets
 JOIN courses ON courses.id = control_sheets.course_id
-JOIN course_students ON course_students.course_id = courses.id;
+JOIN course_students ON course_students.course_id = courses.id
+JOIN groups ON groups.id = courses.group_id
+WHERE groups.name LIKE 'TEST-%';
 
 INSERT INTO attendance_sheets (course_id, status)
 SELECT courses.id, 'OPEN'
@@ -176,7 +181,9 @@ SELECT attendance_sheets.id,
 FROM attendance_sheets
 JOIN courses ON courses.id = attendance_sheets.course_id
 JOIN semesters ON semesters.id = courses.start_semester_id
-CROSS JOIN generate_series(1, 2) AS lecture_series(lecture_number);
+CROSS JOIN generate_series(1, 2) AS lecture_series(lecture_number)
+JOIN groups ON groups.id = courses.group_id
+WHERE groups.name LIKE 'TEST-%';
 
 INSERT INTO lecture_attendance (lecture_id, student_id, was_present)
 SELECT lectures.id,
@@ -184,7 +191,10 @@ SELECT lectures.id,
        (course_students.student_id + lectures.id) % 4 <> 0
 FROM lectures
 JOIN attendance_sheets ON attendance_sheets.id = lectures.attendance_sheet_id
-JOIN course_students ON course_students.course_id = attendance_sheets.course_id;
+JOIN course_students ON course_students.course_id = attendance_sheets.course_id
+JOIN courses ON courses.id = attendance_sheets.course_id
+JOIN groups ON groups.id = courses.group_id
+WHERE groups.name LIKE 'TEST-%';
 
 INSERT INTO coursework_sheets (course_id, status)
 SELECT courses.id, 'OPEN'
@@ -210,4 +220,6 @@ JOIN courses ON courses.id = coursework_sheets.course_id
 JOIN disciplines ON disciplines.id = courses.discipline_id
 JOIN course_students ON course_students.course_id = courses.id
 JOIN students ON students.id = course_students.student_id
-JOIN users ON users.id = students.user_id;
+JOIN users ON users.id = students.user_id
+JOIN groups ON groups.id = courses.group_id
+WHERE groups.name LIKE 'TEST-%';
