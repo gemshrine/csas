@@ -1,5 +1,7 @@
 package com.dev.csas.group;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -21,6 +23,7 @@ public class GroupService {
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final UserActionService userActions;
 
     @Transactional(readOnly = true)
     public List<GroupResponse> findAll() {
@@ -46,7 +49,9 @@ public class GroupService {
                 .studyForm(request.studyForm())
                 .curator(resolveCurator(request.curatorId()))
                 .build();
-        return GroupResponse.from(groupRepository.save(entity));
+        GroupJPAEntity saved = groupRepository.save(entity);
+        userActions.record(UserActionType.GROUP_CREATED, "GROUP", saved.getId(), null);
+        return GroupResponse.from(saved);
     }
 
     @Transactional
@@ -60,7 +65,9 @@ public class GroupService {
         entity.setEducationForm(request.educationForm());
         entity.setStudyForm(request.studyForm());
         entity.setCurator(resolveCurator(request.curatorId()));
-        return GroupResponse.from(groupRepository.save(entity));
+        GroupJPAEntity saved = groupRepository.save(entity);
+        userActions.record(UserActionType.GROUP_UPDATED, "GROUP", saved.getId(), null);
+        return GroupResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
@@ -79,6 +86,7 @@ public class GroupService {
             );
         }
         groupRepository.deleteById(id);
+        userActions.record(UserActionType.GROUP_DELETED, "GROUP", id, null);
     }
 
     private GroupJPAEntity getGroup(Long id) {

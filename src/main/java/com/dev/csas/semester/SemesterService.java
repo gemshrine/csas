@@ -1,5 +1,7 @@
 package com.dev.csas.semester;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.error.CatalogConflictException;
@@ -16,6 +18,7 @@ public class SemesterService {
 
     private final SemesterRepository semesterRepository;
     private final CourseRepository courseRepository;
+    private final UserActionService userActions;
 
     @Transactional(readOnly = true)
     public List<SemesterResponse> findAll() {
@@ -38,7 +41,9 @@ public class SemesterService {
                 .startDate(request.startDate())
                 .endDate(request.endDate())
                 .build();
-        return SemesterResponse.from(semesterRepository.save(entity));
+        SemesterJPAEntity saved = semesterRepository.save(entity);
+        userActions.record(UserActionType.SEMESTER_CREATED, "SEMESTER", saved.getId(), null);
+        return SemesterResponse.from(saved);
     }
 
     @Transactional
@@ -49,7 +54,9 @@ public class SemesterService {
         entity.setName(request.name());
         entity.setStartDate(request.startDate());
         entity.setEndDate(request.endDate());
-        return SemesterResponse.from(semesterRepository.save(entity));
+        SemesterJPAEntity saved = semesterRepository.save(entity);
+        userActions.record(UserActionType.SEMESTER_UPDATED, "SEMESTER", saved.getId(), null);
+        return SemesterResponse.from(saved);
     }
 
     @Transactional
@@ -61,6 +68,7 @@ public class SemesterService {
             );
         }
         semesterRepository.deleteById(id);
+        userActions.record(UserActionType.SEMESTER_DELETED, "SEMESTER", id, null);
     }
 
     private SemesterJPAEntity getSemester(Long id) {

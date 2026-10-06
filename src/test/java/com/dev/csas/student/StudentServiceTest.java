@@ -1,5 +1,6 @@
 package com.dev.csas.student;
 
+import com.dev.csas.audit.UserActionService;
 import com.dev.csas.attendance.LectureAttendanceRepository;
 import com.dev.csas.control.ControlResultRepository;
 import com.dev.csas.course.CourseRepository;
@@ -38,6 +39,8 @@ class StudentServiceTest {
     private LectureAttendanceRepository lectureAttendanceRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private UserActionService userActions;
     @InjectMocks
     private StudentService studentService;
 
@@ -111,6 +114,18 @@ class StudentServiceTest {
         assertThatThrownBy(() -> studentService.delete(1L))
                 .isInstanceOf(CatalogConflictException.class)
                 .hasMessage("Нельзя удалить студента: он зачислен на курс");
+        verify(studentRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void refusesDeletingStudentWithLinkedAccount() {
+        StudentJPAEntity student = student(1L);
+        student.setUser(com.dev.csas.user.UserJPAEntity.builder().id(4L).build());
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+
+        assertThatThrownBy(() -> studentService.delete(1L))
+                .isInstanceOf(CatalogConflictException.class)
+                .hasMessageContaining("Сначала удалите или отвяжите");
         verify(studentRepository, never()).deleteById(any());
     }
 

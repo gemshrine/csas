@@ -3,6 +3,7 @@ package com.dev.csas.attendance;
 import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.Course;
 import com.dev.csas.course.CourseCompletedException;
+import com.dev.csas.course.CourseNotCompletedException;
 import com.dev.csas.course.CourseType;
 import com.dev.csas.course.InvalidCourseTypeException;
 import com.dev.csas.course.NonExistentStudentException;
@@ -79,6 +80,11 @@ public class AttendanceSheet {
     public void close(TeacherID teacherID) {
         validateTeacher(teacherID);
         validateOpen();
+        if (!course.isCompleted()) {
+            throw new CourseNotCompletedException(
+                    "Лекционный курс должен быть завершён до закрытия ведомости посещаемости"
+            );
+        }
         validateAllStudentsRegistered();
 
         this.status = AttendanceSheetStatus.CLOSED;

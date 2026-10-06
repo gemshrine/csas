@@ -17,6 +17,41 @@
     <h1 class="page-title" id="course-title">Курс</h1>
     <p class="page-description" id="course-summary"></p>
     <p class="notice" data-global-notice role="status">Загрузка курса.</p>
+    <section class="panel" id="course-management" th:if="${isDean}">
+        <h2>Управление курсом</h2>
+        <div class="form-actions" id="course-management-actions">
+            <button class="button button-secondary" id="course-edit-open" type="button">Изменить курс</button>
+            <button class="button button-danger" id="course-delete" type="button">Удалить курс</button>
+        </div>
+        <p class="field-hint">Удалить можно только незавершённый курс без заданий и заполненных ведомостей.</p>
+        <form id="course-edit-form" class="field-grid" hidden>
+            <label class="field">
+                <span>Дисциплина</span>
+                <select name="disciplineId" required></select>
+            </label>
+            <label class="field">
+                <span>Группа</span>
+                <select name="groupId" required></select>
+            </label>
+            <label class="field">
+                <span>Преподаватель</span>
+                <select name="teacherId" required></select>
+            </label>
+            <label class="field">
+                <span>Семестр начала</span>
+                <select name="startSemesterId" required></select>
+            </label>
+            <label class="field">
+                <span>Семестр окончания</span>
+                <select name="endSemesterId" required></select>
+            </label>
+            <p class="field-hint field-full">Тип курса после создания изменить нельзя.</p>
+            <div class="form-actions field-full">
+                <button class="button" type="submit">Сохранить изменения</button>
+                <button class="button button-secondary" id="course-edit-cancel" type="button">Отмена</button>
+            </div>
+        </form>
+    </section>
     <section class="panel" id="course-links"></section>
     <section class="panel" id="course-actions" hidden>
         <h2>Действия с курсом</h2>
@@ -62,6 +97,7 @@
     </section>
     <section class="panel" id="works-panel" hidden>
         <h2>Работы и баллы</h2>
+        <p class="field-hint" id="scores-readonly" hidden></p>
         <div class="data-table-wrap">
             <table class="data-table" id="works-table"></table>
         </div>

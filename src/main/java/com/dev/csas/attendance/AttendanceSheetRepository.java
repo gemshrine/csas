@@ -17,6 +17,8 @@ public interface AttendanceSheetRepository extends JpaRepository<AttendanceSheet
 
     Optional<AttendanceSheetJPAEntity> findByCourse_Id(Long courseId);
 
+    boolean existsByCourse_Id(Long courseId);
+
     @Query("select new com.dev.csas.attendance.AttendanceSheetReadModel(s.course.id, s.id, s.status) " +
             "from AttendanceSheetJPAEntity s where s.course.id in :courseIds")
     List<AttendanceSheetReadModel> findCourseSheetReadModels(@Param("courseIds") Collection<Long> courseIds);

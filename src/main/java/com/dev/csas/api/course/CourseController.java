@@ -1,9 +1,12 @@
 package com.dev.csas.api.course;
 
 import com.dev.csas.course.CourseApplicationService;
+import com.dev.csas.course.CourseAssignmentService;
 import com.dev.csas.control.ControlSheetApplicationService;
 import com.dev.csas.control.GradingScale;
 import com.dev.csas.api.control.CreateControlSheetRequest;
+import com.dev.csas.api.CourseHeaderResponse;
+import com.dev.csas.api.course.CourseCreationRequest;
 import com.dev.csas.security.CurrentActorResolver;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,12 +18,14 @@ import org.springframework.web.bind.annotation.*;
 public class CourseController {
 
     private final CourseApplicationService courses;
+    private final CourseAssignmentService assignments;
     private final ControlSheetApplicationService controlSheets;
     private final CurrentActorResolver actors;
 
-    public CourseController(CourseApplicationService courses, ControlSheetApplicationService controlSheets,
-                            CurrentActorResolver actors) {
+    public CourseController(CourseApplicationService courses, CourseAssignmentService assignments,
+                            ControlSheetApplicationService controlSheets, CurrentActorResolver actors) {
         this.courses = courses;
+        this.assignments = assignments;
         this.controlSheets = controlSheets;
         this.actors = actors;
     }
@@ -45,6 +50,23 @@ public class CourseController {
             return courses.getForDean(courseId);
         }
         return courses.getForTeacher(courseId, actors.teacher(authentication));
+    }
+
+    @PutMapping
+    public CourseHeaderResponse update(
+            @PathVariable long courseId,
+            @Valid @RequestBody CourseCreationRequest request,
+            Authentication authentication
+    ) {
+        actors.dean(authentication);
+        return assignments.update(courseId, request);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable long courseId, Authentication authentication) {
+        actors.dean(authentication);
+        assignments.delete(courseId);
     }
 
     @PostMapping("/works")

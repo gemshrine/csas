@@ -5,6 +5,8 @@ import com.dev.csas.shared.LectureID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
 import com.dev.csas.api.attendance.AttendanceSheetDetailsResponse;
+import com.dev.csas.course.CourseApplicationService;
+import com.dev.csas.course.CourseNotCompletedException;
 import com.dev.csas.security.ActorAccessDeniedException;
 import com.dev.csas.control.UnauthorizedTeacherException;
 import jakarta.persistence.EntityManager;
@@ -60,6 +62,9 @@ class AttendanceSheetApplicationServiceIntegrationTest {
     private AttendanceSheetApplicationService service;
 
     @Autowired
+    private CourseApplicationService courses;
+
+    @Autowired
     private AttendanceSheetQueryService queries;
 
     @Autowired
@@ -98,6 +103,7 @@ class AttendanceSheetApplicationServiceIntegrationTest {
                 AttendanceStatusEnum.ABSENT,
                 lecture
         );
+        courses.complete(fixture.lectureCourseId(), new TeacherID(fixture.lectureTeacherId()));
         service.close(fixture.sheetId(), new TeacherID(fixture.lectureTeacherId()));
         service.archive(fixture.sheetId(), new DeanID(1));
 
@@ -122,6 +128,15 @@ class AttendanceSheetApplicationServiceIntegrationTest {
                 "SELECT COUNT(*) FROM lecture_attendance WHERE lecture_id = ?",
                 Integer.class,
                 lecture.id()
+        ));
+    }
+
+    @Test
+    void cannotCloseAttendanceSheetWhileCourseIsInProgress() {
+        Fixture fixture = insertFixture();
+
+        assertThrows(CourseNotCompletedException.class, () -> service.close(
+                fixture.sheetId(), new TeacherID(fixture.lectureTeacherId())
         ));
     }
 
@@ -226,7 +241,8 @@ class AttendanceSheetApplicationServiceIntegrationTest {
                 lectureCourseId
         );
 
-        return new Fixture(sheetId, firstStudentId, secondStudentId, seminarTeacherId, lectureTeacherId);
+        return new Fixture(sheetId, lectureCourseId, firstStudentId, secondStudentId, seminarTeacherId,
+                lectureTeacherId);
     }
 
     private long insert(String sql, Object... parameters) {
@@ -239,6 +255,7 @@ class AttendanceSheetApplicationServiceIntegrationTest {
 
     private record Fixture(
             long sheetId,
+            long lectureCourseId,
             long firstStudentId,
             long secondStudentId,
             long seminarTeacherId,

@@ -35,6 +35,7 @@
         FULL_TIME: 'Очная',
         PART_TIME: 'Очно-заочная',
         EXTRAMURAL: 'Заочная',
+        SYSTEM: 'Система',
         MALE: 'Мужской',
         FEMALE: 'Женский'
     };

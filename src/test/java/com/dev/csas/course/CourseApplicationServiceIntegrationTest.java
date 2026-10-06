@@ -2,6 +2,7 @@ package com.dev.csas.course;
 
 import com.dev.csas.api.course.CourseWorkRequest;
 import com.dev.csas.api.course.CourseCreationRequest;
+import com.dev.csas.api.user.UserCreationRequest;
 import com.dev.csas.coursework.CourseworkSheetApplicationService;
 import com.dev.csas.coursework.CourseworkSheetQueryService;
 import com.dev.csas.coursework.CourseworkSheetRepository;
@@ -10,6 +11,10 @@ import com.dev.csas.control.ControlSheetApplicationService;
 import com.dev.csas.control.GradingScale;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.security.ActorAccessDeniedException;
+import com.dev.csas.user.RoleEnum;
+import com.dev.csas.user.UserAdministrationService;
+import com.dev.csas.user.UserRepository;
+import com.dev.csas.student.StudentRepository;
 import com.dev.csas.shared.DeanID;
 import com.dev.csas.shared.StudentID;
 import com.dev.csas.shared.TeacherID;
@@ -19,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -30,7 +36,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.sql.Date;
+import java.util.Map;
 
+import static org.mockito.Mockito.doReturn;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
@@ -57,6 +65,18 @@ class CourseApplicationServiceIntegrationTest {
 
     @Autowired
     private CourseAssignmentService courseAssignment;
+
+    @Autowired
+    private UserAdministrationService userAdministration;
+
+    @Autowired
+    private UserRepository users;
+
+    @Autowired
+    private StudentRepository students;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private CourseworkSheetRepository courseworkSheets;
@@ -94,6 +114,11 @@ class CourseApplicationServiceIntegrationTest {
 
         var details = service.getForTeacher(fixture.seminarCourseId(), teacher);
         assertEquals(CourseType.SEMINAR, details.courseType());
+        assertEquals(fixture.disciplineId(), details.disciplineId());
+        assertEquals(fixture.groupId(), details.groupId());
+        assertEquals(fixture.semesterId(), details.startSemesterId());
+        assertEquals(fixture.semesterId(), details.endSemesterId());
+        assertEquals(fixture.seminarTeacherId(), details.teacherId());
         assertEquals(1, details.works().size());
         assertEquals(30, details.works().getFirst().scores().getFirst().score());
         assertEquals(75.0, details.students().getFirst().rating());
@@ -235,6 +260,71 @@ class CourseApplicationServiceIntegrationTest {
         entityManager.flush();
         assertEquals("OPEN", jdbc.queryForObject("SELECT status FROM coursework_sheets WHERE id = ?",
                 String.class, sheet.getId()));
+    }
+
+    @Test
+    void updatesCourseGroupWhileItsAutomaticallyCreatedSheetIsEmpty() {
+        Fixture fixture = insertFixture();
+        long otherGroupId = insert("INSERT INTO groups " +
+                        "(name, year_of_admission, specialty, course, education_form, study_form) " +
+                        "VALUES ('API-TEST-OTHER', 2024, 'Информатика', 3, 'BUDGET', 'FULL_TIME') RETURNING id");
+        long otherStudentId = insert("INSERT INTO students " +
+                        "(first_name, last_name, record_book_number, group_id) " +
+                        "VALUES ('Мария', 'Смирнова', 'API00003', ?) RETURNING id", otherGroupId);
+        var assigned = courseAssignment.assign(new CourseCreationRequest(
+                fixture.disciplineId(), fixture.groupId(), fixture.semesterId(), fixture.semesterId(),
+                CourseType.COURSEWORK, fixture.seminarTeacherId()
+        ));
+
+        courseAssignment.update(assigned.id(), new CourseCreationRequest(
+                fixture.disciplineId(), otherGroupId, fixture.semesterId(), fixture.semesterId(),
+                CourseType.COURSEWORK, fixture.seminarTeacherId()
+        ));
+        entityManager.flush();
+
+        assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM course_students " +
+                "WHERE course_id = ? AND student_id = ?", Integer.class, assigned.id(), otherStudentId));
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM course_students " +
+                "WHERE course_id = ? AND student_id = ?", Integer.class, assigned.id(), fixture.studentId()));
+        assertTrue(courseworkSheets.findByCourse_Id(assigned.id()).isPresent());
+    }
+
+    @Test
+    void deletesCourseWithOnlyAnEmptyAutomaticallyCreatedSheet() {
+        Fixture fixture = insertFixture();
+        var assigned = courseAssignment.assign(new CourseCreationRequest(
+                fixture.disciplineId(), fixture.groupId(), fixture.semesterId(), fixture.semesterId(),
+                CourseType.COURSEWORK, fixture.seminarTeacherId()
+        ));
+
+        courseAssignment.delete(assigned.id());
+        entityManager.flush();
+
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM courses WHERE id = ?",
+                Integer.class, assigned.id()));
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM coursework_sheets WHERE course_id = ?",
+                Integer.class, assigned.id()));
+    }
+
+    @Test
+    void createsAndDeletesStudentAccountWithoutDeletingItsProfile() {
+        Fixture fixture = insertFixture();
+        doReturn(Map.of()).when(sessions).findByPrincipalName("api-student");
+
+        var account = userAdministration.create(new UserCreationRequest(
+                "api-student", "password123", RoleEnum.STUDENT, fixture.studentId()
+        ));
+
+        var persistedAccount = users.findById(account.id()).orElseThrow();
+        assertTrue(passwordEncoder.matches("password123", persistedAccount.getPassword()));
+        assertEquals(fixture.studentId(), account.profileId());
+        assertEquals(account.id(), students.findByUser_Id(account.id()).orElseThrow().getUser().getId());
+
+        userAdministration.delete(account.id(), "admin");
+        entityManager.flush();
+
+        assertTrue(users.findById(account.id()).isEmpty());
+        assertNull(students.findById(fixture.studentId()).orElseThrow().getUser());
     }
 
     private Fixture insertFixture() {

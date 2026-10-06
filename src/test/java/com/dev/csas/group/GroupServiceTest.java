@@ -1,5 +1,6 @@
 package com.dev.csas.group;
 
+import com.dev.csas.audit.UserActionService;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.enums.EducationFormEnum;
 import com.dev.csas.enums.StudyFormEnum;
@@ -36,6 +37,8 @@ class GroupServiceTest {
     private CourseRepository courseRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserActionService userActions;
     @InjectMocks
     private GroupService groupService;
 

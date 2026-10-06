@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Журнал действий | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/admin-audit-events.js" defer></script>
+</head>
+<body data-page="adminAuditEvents">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <h1 class="page-title">Журнал действий</h1>
+    <p class="page-description">Последние действия, изменившие данные системы.</p>
+    <p class="notice" data-global-notice role="status">Загрузка журнала.</p>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Дата и время</th>
+                <th>Пользователь</th>
+                <th>Роль</th>
+                <th>Действие</th>
+                <th>Объект</th>
+                <th>Подробности</th>
+            </tr>
+            </thead>
+            <tbody id="audit-events-body"></tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

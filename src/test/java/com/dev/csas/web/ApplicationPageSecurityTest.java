@@ -155,7 +155,24 @@ class ApplicationPageSecurityTest {
     void adminCanOpenAccountManagementPage() throws Exception {
         mvc.perform(get("/admin/users"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Учётные записи")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Учётные записи")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("account-create-form")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("account-edit-dialog")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminCanOpenActionJournalPage() throws Exception {
+        mvc.perform(get("/admin/audit-events"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Журнал действий")));
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deniesDeanFromActionJournalPage() throws Exception {
+        mvc.perform(get("/admin/audit-events"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -206,6 +223,13 @@ class ApplicationPageSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "Переоткрыть в следующем семестре"
+                )))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("course-management")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Изменить курс")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Удалить курс")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("scores-readonly")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("id=\"course-management\" hidden")
                 )));
     }
 

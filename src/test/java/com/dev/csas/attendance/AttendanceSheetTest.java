@@ -2,6 +2,7 @@ package com.dev.csas.attendance;
 
 import com.dev.csas.control.UnauthorizedTeacherException;
 import com.dev.csas.course.Course;
+import com.dev.csas.course.CourseNotCompletedException;
 import com.dev.csas.course.CourseType;
 import com.dev.csas.course.NonExistentStudentException;
 import com.dev.csas.shared.*;
@@ -71,25 +72,24 @@ public class AttendanceSheetTest {
         LectureID lectureID = new LectureID(1);
         attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "Лекция 1");
         attendanceSheet.register(lectureTeacher, student, AttendanceStatusEnum.PRESENT, lectureID);
+        course.complete();
 
         assertThatThrownBy(() -> attendanceSheet.close(lectureTeacher))
                 .isInstanceOf(InvalidRegisterException.class);
-
-        attendanceSheet.register(lectureTeacher, otherStudent, AttendanceStatusEnum.ABSENT, lectureID);
-        attendanceSheet.close(lectureTeacher);
-
-        assertThat(attendanceSheet.status()).isEqualTo(AttendanceSheetStatus.CLOSED);
     }
 
     @Test
-    void completedCourseCanCloseAttendanceButCannotChangeMarks() {
+    void attendanceCannotCloseUntilCourseIsCompleted() {
         Course course = new Course(List.of(student), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
         LectureID lectureID = new LectureID(1);
         attendanceSheet.addLecture(lectureTeacher, lectureID, LocalDate.of(2026, 9, 14), "Лекция 1");
         attendanceSheet.register(lectureTeacher, student, AttendanceStatusEnum.PRESENT, lectureID);
-        course.complete();
 
+        assertThatThrownBy(() -> attendanceSheet.close(lectureTeacher))
+                .isInstanceOf(CourseNotCompletedException.class);
+
+        course.complete();
         assertThatThrownBy(() -> attendanceSheet.register(
                 lectureTeacher, student, AttendanceStatusEnum.ABSENT, lectureID))
                 .isInstanceOf(com.dev.csas.course.CourseCompletedException.class);
@@ -113,6 +113,7 @@ public class AttendanceSheetTest {
     void cannotArchiveArchivedSheet() {
         Course course = new Course(List.of(student, otherStudent), CourseType.LECTURE, lectureTeacher);
         AttendanceSheet attendanceSheet = new AttendanceSheet(course);
+        course.complete();
         attendanceSheet.close(lectureTeacher);
         attendanceSheet.archive(dean);
 
@@ -131,6 +132,8 @@ public class AttendanceSheetTest {
         LectureID lectureID1 = new LectureID(1);
         LectureID lectureID2 = new LectureID(2);
 
+        course1.complete();
+        course2.complete();
         attendanceSheet1.close(lectureTeacher);
         attendanceSheet2.close(lectureTeacher);
         attendanceSheet2.archive(dean);

@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserJPAEntity, Long> {
     Optional<UserJPAEntity> findByUsername(String username);
 
+    boolean existsByUsernameAndIdNot(String username, Long id);
+
     List<UserJPAEntity> findAllByOrderByIdAsc();
 
     List<UserJPAEntity> findAllByRoleAndEnabledTrueOrderByIdAsc(RoleEnum role);
