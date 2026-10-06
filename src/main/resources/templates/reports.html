@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Отчёты | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/reports.js" defer></script>
+</head>
+<body data-page="reports">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <h1 class="page-title">Отчёты</h1>
+    <p class="page-description">Отчёты формируются по текущим данным и скачиваются в формате XLSX или PDF.</p>
+    <p class="notice" data-global-notice role="status">Загрузка групп.</p>
+    <section class="panel">
+        <h2>Сводные отчёты</h2>
+        <div class="form-actions">
+            <a class="button button-secondary" href="/api/reports/debtors.xlsx" download>Скачать список должников XLSX</a>
+            <a class="button button-secondary" href="/api/reports/debtors.pdf" download>Скачать список должников PDF</a>
+            <a class="button button-secondary" href="/api/reports/statistics.xlsx" download>Скачать статистику XLSX</a>
+            <a class="button button-secondary" href="/api/reports/statistics.pdf" download>Скачать статистику PDF</a>
+        </div>
+    </section>
+    <section class="panel">
+        <h2>Рейтинг группы</h2>
+        <div class="field-grid">
+            <label class="field field-full">
+                <span>Группа</span>
+                <select id="report-group" required>
+                    <option value="">Выберите группу</option>
+                </select>
+            </label>
+            <div class="field-full form-actions">
+                <a class="button button-secondary" id="group-rating-report" hidden download>Скачать рейтинг XLSX</a>
+                <a class="button button-secondary" id="group-rating-pdf-report" hidden download>Скачать рейтинг PDF</a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

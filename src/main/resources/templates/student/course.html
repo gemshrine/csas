@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Моя успеваемость | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/student-course.js" defer></script>
+</head>
+<body data-page="studentCourse" th:attr="data-course-id=${course.courseId}">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <a href="/me/courses">Вернуться к списку курсов</a>
+    <h1 class="page-title" id="course-title">Курс</h1>
+    <p class="page-description" id="course-summary"></p>
+    <p class="notice" data-global-notice role="status">Загрузка успеваемости.</p>
+    <section class="panel" id="student-course-result"></section>
+    <section class="panel" id="student-works-panel" hidden>
+        <h2>Работы и баллы</h2>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                <tr><th>Работа</th><th>Дата</th><th>Балл</th><th>Максимум</th></tr>
+                </thead>
+                <tbody id="student-works"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

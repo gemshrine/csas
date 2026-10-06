@@ -1,10 +1,7 @@
 package com.dev.csas.web;
 
-import com.dev.csas.api.course.CourseSummaryResponse;
 import com.dev.csas.api.course.StudentCourseDetailsResponse;
-import com.dev.csas.api.course.StudentCourseSummaryResponse;
 import com.dev.csas.course.CourseApplicationService;
-import com.dev.csas.course.CourseQueryService;
 import com.dev.csas.course.CourseStatus;
 import com.dev.csas.course.StudentCourseQueryService;
 import com.dev.csas.security.CurrentActorResolver;
@@ -15,23 +12,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.List;
-
 @Controller
 public class ApplicationPageController {
 
-    private final CourseQueryService courses;
     private final CourseApplicationService courseDetails;
     private final StudentCourseQueryService studentCourses;
     private final CurrentActorResolver actors;
 
     public ApplicationPageController(
-            CourseQueryService courses,
             CourseApplicationService courseDetails,
             StudentCourseQueryService studentCourses,
             CurrentActorResolver actors
     ) {
-        this.courses = courses;
         this.courseDetails = courseDetails;
         this.studentCourses = studentCourses;
         this.actors = actors;
@@ -43,12 +35,13 @@ public class ApplicationPageController {
     }
 
     @GetMapping("/courses")
-    public String courses(Authentication authentication, Model model) {
-        List<CourseSummaryResponse> result = isDean(authentication)
-                ? courses.listForDean()
-                : courses.listForTeacher(actors.teacher(authentication));
-        model.addAttribute("courses", result);
+    public String courses() {
         return "courses";
+    }
+
+    @GetMapping("/courses/new")
+    public String newCourse() {
+        return "course-create";
     }
 
     @GetMapping("/courses/{courseId}")
@@ -71,9 +64,7 @@ public class ApplicationPageController {
     }
 
     @GetMapping("/me/courses")
-    public String studentCourses(Authentication authentication, Model model) {
-        List<StudentCourseSummaryResponse> result = studentCourses.list(actors.student(authentication));
-        model.addAttribute("courses", result);
+    public String studentCourses() {
         return "student/courses";
     }
 

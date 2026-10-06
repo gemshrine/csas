@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Курсовая работа | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/coursework-sheet.js" defer></script>
+</head>
+<body data-page="courseworkSheet" th:attr="data-sheet-id=${sheet.sheetId}">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <a th:href="@{/courses/{id}(id=${sheet.course.id})}">Вернуться к курсу</a>
+    <h1 class="page-title" id="sheet-title">Ведомость курсовых работ</h1>
+    <p class="page-description" id="sheet-summary"></p>
+    <p class="notice" data-global-notice role="status">Загрузка ведомости.</p>
+    <p class="form-actions">
+        <a class="button button-secondary" id="coursework-report-link" hidden download>Скачать ведомость XLSX</a>
+        <a class="button button-secondary" id="coursework-report-pdf-link" hidden download>Скачать ведомость PDF</a>
+    </p>
+    <section class="panel">
+        <h2>Результаты студентов</h2>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Студент</th>
+                    <th>Баллы</th>
+                    <th>Оценка</th>
+                </tr>
+                </thead>
+                <tbody id="coursework-results"></tbody>
+            </table>
+        </div>
+    </section>
+    <section class="panel" id="coursework-actions" hidden>
+        <h2>Действия с ведомостью</h2>
+        <div class="form-actions" id="coursework-action-buttons"></div>
+        <form class="field-grid" id="reopen-form" hidden>
+            <label class="field field-full">
+                <span>Семестр пересдачи</span>
+                <select name="semesterId" required></select>
+            </label>
+            <div class="field-full form-actions">
+                <button class="button button-secondary" type="submit">Переоткрыть ведомость</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

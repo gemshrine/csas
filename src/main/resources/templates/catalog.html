@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Справочник | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/catalog.js" defer></script>
+</head>
+<body data-page="catalog" th:attr="data-catalog-type=${catalogType}">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <h1 class="page-title" id="catalog-title">Справочник</h1>
+    <p class="page-description" id="catalog-description"></p>
+    <p class="notice" data-global-notice role="status">Загрузка записей.</p>
+    <section class="panel" id="catalog-detail-panel" hidden>
+        <h2 id="catalog-detail-title">Карточка записи</h2>
+        <dl class="detail-list" id="catalog-detail"></dl>
+        <div class="form-actions" id="catalog-report-actions" hidden></div>
+        <div class="form-actions">
+            <button class="button button-secondary" id="edit-detail-button" type="button">Изменить</button>
+            <button class="button button-danger" id="delete-detail-button" type="button">Удалить</button>
+        </div>
+    </section>
+    <section class="panel">
+        <div class="toolbar">
+            <input class="search-input course-search" id="catalog-search" type="search" aria-label="Поиск"
+                   placeholder="Поиск по справочнику">
+            <button class="button" id="new-item-button" type="button">Добавить запись</button>
+        </div>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead id="catalog-head"></thead>
+                <tbody id="catalog-body"></tbody>
+            </table>
+        </div>
+    </section>
+    <section class="panel" id="catalog-form-panel" hidden>
+        <h2 id="catalog-form-title">Новая запись</h2>
+        <form class="field-grid" id="catalog-form"></form>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Учётные записи | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/admin-users.js" defer></script>
+</head>
+<body data-page="adminUsers">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <h1 class="page-title">Учётные записи</h1>
+    <p class="page-description">Изменение роли завершает активные сессии пользователя.</p>
+    <p class="notice" data-global-notice role="status">Загрузка учётных записей.</p>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead>
+            <tr><th>Логин</th><th>Роль</th><th>Состояние</th></tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

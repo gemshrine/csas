@@ -12,7 +12,6 @@
 <div class="login-container">
 
     <div class="logo-area">
-        <div class="icon">🎓</div>
         <h1>Учет успеваемости</h1>
         <p>Электронный кабинет студента и преподавателя</p>
     </div>
@@ -22,7 +21,7 @@
 
 
         <div class="form-group">
-            <label for="username">Логин или Email</label>
+                        <label for="username">Логин</label>
             <div class="input-wrapper">
                 <input
                         type="text"
@@ -43,19 +42,11 @@
                         type="password"
                         id="password"
                         name="password"
-                        placeholder="••••••••"
+                        placeholder="Введите пароль"
                         required
                         autocomplete="current-password"
                 >
             </div>
-        </div>
-
-
-        <div class="form-options">
-            <label class="remember-me">
-                <input type="checkbox" name="remember"> Запомнить меня
-            </label>
-            <a href="#" class="forgot-password">Забыли пароль?</a>
         </div>
 
 
@@ -64,9 +55,6 @@
     </form>
 
 
-    <div class="login-footer">
-        &copy; 2026 Университетская информационная система
-    </div>
 </div>
 
 <script src="/api-client.js"></script>
@@ -99,7 +87,7 @@
 
     loginForm.addEventListener('submit', async event => {
         event.preventDefault();
-        loginMessage.textContent = 'Выполняется вход…';
+        loginMessage.textContent = 'Выполняется вход';
         try {
             const user = await CsasApi.request('/api/auth/login', {
                 method: 'POST',

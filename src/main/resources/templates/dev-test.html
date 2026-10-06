@@ -50,7 +50,7 @@
         for (const course of courses) {
             const item = document.createElement('li');
             const title = document.createElement('h2');
-            title.textContent = `${course.disciplineName} · ${course.groupName} · ${course.semesterName}`;
+            title.textContent = `${course.disciplineName}, ${course.groupName}, ${course.semesterName}`;
             item.append(title);
 
             if (course.canReadControlSheet && course.controlSheetId !== null) {
