@@ -29,14 +29,27 @@ public class ControlSheet {
 
     public ControlSheet(Course course, ControlFormEnum controlForm, GradingScale gradingScale) {
         this.course = Objects.requireNonNull(course);
-        if (course.type() != CourseType.SEMINAR) {
-            throw new InvalidCourseTypeException("Контрольная ведомость создаётся только для семинарного курса");
-        }
+        validateCourseType(course);
         if (!course.isCompleted()) {
             throw new CourseNotCompletedException("Нельзя открыть ведомость для незавершённого курса");
         }
         this.controlForm = Objects.requireNonNull(controlForm);
         this.gradingScale = Objects.requireNonNull(gradingScale);
+    }
+
+    private ControlSheet(
+            Course course,
+            ControlFormEnum controlForm,
+            GradingScale gradingScale,
+            ControlSheetStatus status,
+            Map<StudentID, ControlResult> results
+    ) {
+        this.course = Objects.requireNonNull(course);
+        validateCourseType(course);
+        this.controlForm = Objects.requireNonNull(controlForm);
+        this.gradingScale = Objects.requireNonNull(gradingScale);
+        this.status = Objects.requireNonNull(status);
+        this.results.putAll(results);
     }
 
     static ControlSheet reconstitute(
@@ -46,10 +59,7 @@ public class ControlSheet {
             ControlSheetStatus status,
             Map<StudentID, ControlResult> results
     ) {
-        ControlSheet sheet = new ControlSheet(course, controlForm, gradingScale);
-        sheet.status = Objects.requireNonNull(status);
-        sheet.results.putAll(results);
-        return sheet;
+        return new ControlSheet(course, controlForm, gradingScale, status, results);
     }
 
     public void enterNumericResult(TeacherID teacher, StudentID student, int score) {
@@ -210,6 +220,12 @@ public class ControlSheet {
 
         if (!teacher.equals(course.teacher())) {
             throw new UnauthorizedTeacherException("Результат может внести только преподаватель курса");
+        }
+    }
+
+    private static void validateCourseType(Course course) {
+        if (course.type() != CourseType.SEMINAR) {
+            throw new InvalidCourseTypeException("Контрольная ведомость создаётся только для семинарного курса");
         }
     }
 

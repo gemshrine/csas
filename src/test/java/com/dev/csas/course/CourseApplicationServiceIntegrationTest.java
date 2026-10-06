@@ -8,6 +8,7 @@ import com.dev.csas.coursework.CourseworkSheetQueryService;
 import com.dev.csas.coursework.CourseworkSheetRepository;
 import com.dev.csas.coursework.CourseworkGrade;
 import com.dev.csas.control.ControlSheetApplicationService;
+import com.dev.csas.control.ControlSheetStatus;
 import com.dev.csas.control.GradingScale;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.security.ActorAccessDeniedException;
@@ -222,6 +223,38 @@ class CourseApplicationServiceIntegrationTest {
         assertNull(studentCourses.get(new StudentID(fixture.studentId()), fixture.lectureCourseId()).rating());
         assertThrows(CourseNotFoundException.class,
                 () -> studentCourses.get(new StudentID(anotherStudentId + 1000), fixture.seminarCourseId()));
+    }
+
+    @Test
+    void studentCanReadControlResultAfterCourseIsReopened() {
+        Fixture fixture = insertFixture();
+        TeacherID teacher = new TeacherID(fixture.seminarTeacherId());
+        long workNumber = service.addWork(fixture.seminarCourseId(), teacher,
+                new CourseWorkRequest("Работа", 20, Date.valueOf("2026-10-10").toLocalDate()));
+        service.enterScore(fixture.seminarCourseId(), workNumber, fixture.studentId(), teacher, 17);
+        service.complete(fixture.seminarCourseId(), teacher);
+
+        long sheetId = controlSheets.createForCompletedCourse(
+                fixture.seminarCourseId(), teacher, new GradingScale(85, 70, 50));
+        controlSheets.enterNumericResult(sheetId, teacher, new StudentID(fixture.studentId()), 88, null);
+        controlSheets.close(sheetId, teacher);
+
+        insert("INSERT INTO semesters (name, start_date, end_date) VALUES (?, ?, ?) RETURNING id",
+                "API test next semester", Date.valueOf("2027-02-01"), Date.valueOf("2027-06-30"));
+        service.reopenInNextSemester(fixture.seminarCourseId(), new DeanID(1));
+
+        var summary = studentCourses.list(new StudentID(fixture.studentId())).stream()
+                .filter(course -> course.courseId() == fixture.seminarCourseId())
+                .findFirst()
+                .orElseThrow();
+        var details = studentCourses.get(new StudentID(fixture.studentId()), fixture.seminarCourseId());
+
+        assertEquals(CourseStatus.IN_PROGRESS, summary.status());
+        assertEquals(85.0, summary.rating());
+        assertEquals(ControlSheetStatus.CLOSED, summary.controlResult().sheetStatus());
+        assertEquals(86.5, summary.controlResult().finalScore());
+        assertEquals(5, summary.controlResult().finalGrade());
+        assertEquals(5, details.controlResult().finalGrade());
     }
 
     @Test
