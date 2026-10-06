@@ -1,5 +1,7 @@
 package com.dev.csas.teacher;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -15,6 +17,7 @@ public class TeacherService {
 
     private final TeacherRepository teacherRepository;
     private final CourseRepository courseRepository;
+    private final UserActionService userActions;
 
     @Transactional(readOnly = true)
     public List<TeacherResponse> findAll() {
@@ -40,7 +43,9 @@ public class TeacherService {
                 .email(request.email())
                 .phone(request.phone())
                 .build();
-        return TeacherResponse.from(teacherRepository.save(entity));
+        TeacherJPAEntity saved = teacherRepository.save(entity);
+        userActions.record(UserActionType.TEACHER_CREATED, "TEACHER", saved.getId(), null);
+        return TeacherResponse.from(saved);
     }
 
     @Transactional
@@ -54,18 +59,26 @@ public class TeacherService {
         entity.setAcademicDegree(request.academicDegree());
         entity.setEmail(request.email());
         entity.setPhone(request.phone());
-        return TeacherResponse.from(teacherRepository.save(entity));
+        TeacherJPAEntity saved = teacherRepository.save(entity);
+        userActions.record(UserActionType.TEACHER_UPDATED, "TEACHER", saved.getId(), null);
+        return TeacherResponse.from(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-        getTeacher(id);
+        TeacherJPAEntity teacher = getTeacher(id);
+        if (teacher.getUser() != null) {
+            throw new CatalogConflictException(
+                    "Сначала удалите или отвяжите учётную запись преподавателя"
+            );
+        }
         if (courseRepository.existsByTeacher_Id(id)) {
             throw new CatalogConflictException(
                     "Нельзя удалить преподавателя: он назначен на курс"
             );
         }
         teacherRepository.deleteById(id);
+        userActions.record(UserActionType.TEACHER_DELETED, "TEACHER", id, null);
     }
 
     private TeacherJPAEntity getTeacher(Long id) {

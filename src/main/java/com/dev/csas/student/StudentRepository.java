@@ -13,6 +13,8 @@ public interface StudentRepository extends JpaRepository<StudentJPAEntity, Long>
 
     List<StudentJPAEntity> findAllByGroup_IdOrderByIdAsc(Long groupId);
 
+    List<StudentJPAEntity> findAllByUserIsNullOrderByIdAsc();
+
     boolean existsByRecordBookNumber(String recordBookNumber);
 
     boolean existsByRecordBookNumberAndIdNot(String recordBookNumber, Long id);

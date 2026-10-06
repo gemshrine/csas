@@ -1,5 +1,6 @@
 package com.dev.csas.teacher;
 
+import com.dev.csas.audit.UserActionService;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -25,6 +26,8 @@ class TeacherServiceTest {
     private TeacherRepository teacherRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private UserActionService userActions;
     @InjectMocks
     private TeacherService teacherService;
 
@@ -70,6 +73,18 @@ class TeacherServiceTest {
         teacherService.delete(2L);
 
         verify(teacherRepository).deleteById(2L);
+    }
+
+    @Test
+    void refusesDeletingTeacherWithLinkedAccount() {
+        TeacherJPAEntity teacher = teacher(2L);
+        teacher.setUser(com.dev.csas.user.UserJPAEntity.builder().id(4L).build());
+        when(teacherRepository.findById(2L)).thenReturn(Optional.of(teacher));
+
+        assertThatThrownBy(() -> teacherService.delete(2L))
+                .isInstanceOf(CatalogConflictException.class)
+                .hasMessageContaining("Сначала удалите или отвяжите");
+        verify(teacherRepository, never()).deleteById(any());
     }
 
     private static TeacherRequest request() {

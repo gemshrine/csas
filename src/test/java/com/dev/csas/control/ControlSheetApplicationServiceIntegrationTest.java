@@ -99,9 +99,36 @@ class ControlSheetApplicationServiceIntegrationTest {
                 fixture.seminarTeacherId(),
                 "Пересдача"
         );
+        Integer userActionCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM user_action_events " +
+                        "WHERE entity_type = 'CONTROL_SHEET' AND entity_id = ? " +
+                        "AND action_type = 'CONTROL_RESULT_ENTERED'",
+                Integer.class,
+                fixture.sheetId()
+        );
 
         assertEquals(88, score);
         assertEquals(1, eventCount);
+        assertEquals(1, userActionCount);
+    }
+
+    @Test
+    void rejectedResultDoesNotCreateUserActionEvent() {
+        Fixture fixture = insertFixture();
+
+        assertThrows(InvalidControlResultException.class, () -> service.enterNumericResult(
+                fixture.sheetId(),
+                new TeacherID(fixture.seminarTeacherId()),
+                new StudentID(fixture.studentId()),
+                101,
+                null
+        ));
+
+        assertEquals(0, jdbc.queryForObject(
+                "SELECT COUNT(*) FROM user_action_events WHERE entity_type = 'CONTROL_SHEET' AND entity_id = ?",
+                Integer.class,
+                fixture.sheetId()
+        ));
     }
 
     @Test

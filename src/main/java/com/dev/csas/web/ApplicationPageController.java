@@ -51,6 +51,7 @@ public class ApplicationPageController {
                 ? courseDetails.getForDean(courseId)
                 : courseDetails.getForTeacher(courseId, actors.teacher(authentication));
         model.addAttribute("course", course);
+        model.addAttribute("isDean", dean);
         model.addAttribute("canReopen", dean
                 && course.status() == CourseStatus.COMPLETED
                 && courseDetails.canReopenInNextSemester(courseId));

@@ -13,16 +13,63 @@
 <div th:replace="~{fragments/menu :: menu}"></div>
 <main class="page-shell">
     <h1 class="page-title">Учётные записи</h1>
-    <p class="page-description">Изменение роли завершает активные сессии пользователя.</p>
+    <p class="page-description">Изменение логина, пароля, роли или состояния завершает активные сессии пользователя.</p>
     <p class="notice" data-global-notice role="status">Загрузка учётных записей.</p>
+    <section class="panel">
+        <h2>Добавить учётную запись</h2>
+        <form id="account-create-form" class="field-grid">
+            <label class="field">
+                <span>Логин</span>
+                <input name="username" minlength="3" maxlength="50" autocomplete="off" required>
+            </label>
+            <label class="field">
+                <span>Пароль</span>
+                <input name="password" type="password" minlength="8" maxlength="100" autocomplete="new-password" required>
+            </label>
+            <label class="field">
+                <span>Роль</span>
+                <select name="role" required>
+                    <option value="ADMIN">Администратор</option>
+                    <option value="DEAN">Деканат</option>
+                    <option value="TEACHER">Преподаватель</option>
+                    <option value="STUDENT">Студент</option>
+                </select>
+            </label>
+            <label class="field" id="create-profile-field" hidden>
+                <span>Профиль</span>
+                <select name="profileId"></select>
+            </label>
+            <div class="form-actions field-full">
+                <button class="button" type="submit">Создать учётную запись</button>
+            </div>
+        </form>
+    </section>
     <div class="data-table-wrap">
         <table class="data-table">
             <thead>
-            <tr><th>Логин</th><th>Роль</th><th>Состояние</th></tr>
+            <tr><th>Логин</th><th>Роль</th><th>Профиль</th><th>Состояние</th><th>Действия</th></tr>
             </thead>
             <tbody id="users-body"></tbody>
         </table>
     </div>
 </main>
+<dialog id="account-edit-dialog" class="account-dialog">
+    <form id="account-edit-form">
+        <h2>Изменить учётную запись</h2>
+        <p class="page-description">Новый пароль можно оставить пустым, если менять его не нужно.</p>
+        <label class="field">
+            <span>Логин</span>
+            <input name="username" minlength="3" maxlength="50" required>
+        </label>
+        <label class="field">
+            <span>Новый пароль</span>
+            <input name="password" type="password" minlength="8" maxlength="100" autocomplete="new-password">
+        </label>
+        <div class="form-actions">
+            <button class="button" type="submit">Сохранить</button>
+            <button class="button button-secondary" type="button" id="account-edit-cancel">Отмена</button>
+        </div>
+    </form>
+</dialog>
 </body>
 </html>

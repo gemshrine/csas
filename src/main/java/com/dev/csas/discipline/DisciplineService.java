@@ -1,5 +1,7 @@
 package com.dev.csas.discipline;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -15,6 +17,7 @@ public class DisciplineService {
 
     private final DisciplineRepository disciplineRepository;
     private final CourseRepository courseRepository;
+    private final UserActionService userActions;
 
     @Transactional(readOnly = true)
     public List<DisciplineResponse> findAll() {
@@ -39,7 +42,9 @@ public class DisciplineService {
                 .labHours(request.labHours())
                 .controlForm(request.controlForm())
                 .build();
-        return DisciplineResponse.from(disciplineRepository.save(entity));
+        DisciplineJPAEntity saved = disciplineRepository.save(entity);
+        userActions.record(UserActionType.DISCIPLINE_CREATED, "DISCIPLINE", saved.getId(), null);
+        return DisciplineResponse.from(saved);
     }
 
     @Transactional
@@ -52,7 +57,9 @@ public class DisciplineService {
         entity.setPracticeHours(request.practiceHours());
         entity.setLabHours(request.labHours());
         entity.setControlForm(request.controlForm());
-        return DisciplineResponse.from(disciplineRepository.save(entity));
+        DisciplineJPAEntity saved = disciplineRepository.save(entity);
+        userActions.record(UserActionType.DISCIPLINE_UPDATED, "DISCIPLINE", saved.getId(), null);
+        return DisciplineResponse.from(saved);
     }
 
     @Transactional
@@ -64,6 +71,7 @@ public class DisciplineService {
             );
         }
         disciplineRepository.deleteById(id);
+        userActions.record(UserActionType.DISCIPLINE_DELETED, "DISCIPLINE", id, null);
     }
 
     private DisciplineJPAEntity getDiscipline(Long id) {

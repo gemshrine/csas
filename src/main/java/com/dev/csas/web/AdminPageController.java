@@ -10,4 +10,9 @@ public class AdminPageController {
     public String users() {
         return "admin/users";
     }
+
+    @GetMapping("/admin/audit-events")
+    public String auditEvents() {
+        return "admin/audit-events";
+    }
 }

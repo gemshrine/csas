@@ -1,5 +1,7 @@
 package com.dev.csas.control;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.control.audit.ControlSheetEvent;
 import com.dev.csas.control.audit.ControlSheetEventJPAEntity;
 import com.dev.csas.control.audit.ControlSheetEventMapper;
@@ -34,6 +36,7 @@ public class ControlSheetApplicationService {
     private final ControlSheetEventMapper eventMapper;
     private final com.dev.csas.course.CourseRepository courses;
     private final CourseMapper courseMapper;
+    private final UserActionService userActions;
 
     public ControlSheetApplicationService(
             ControlSheetRepository sheets,
@@ -41,7 +44,8 @@ public class ControlSheetApplicationService {
             ControlSheetMapper mapper,
             ControlSheetEventMapper eventMapper,
             com.dev.csas.course.CourseRepository courses,
-            CourseMapper courseMapper
+            CourseMapper courseMapper,
+            UserActionService userActions
     ) {
         this.sheets = sheets;
         this.events = events;
@@ -49,6 +53,7 @@ public class ControlSheetApplicationService {
         this.eventMapper = eventMapper;
         this.courses = courses;
         this.courseMapper = courseMapper;
+        this.userActions = userActions;
     }
 
     @Transactional
@@ -73,7 +78,9 @@ public class ControlSheetApplicationService {
                 .grade3From(gradingScale.grade3From())
                 .status(sheet.status())
                 .build();
-        return sheets.saveAndFlush(entity).getId();
+        long sheetId = sheets.saveAndFlush(entity).getId();
+        userActions.record(UserActionType.CONTROL_SHEET_CREATED, "CONTROL_SHEET", sheetId, null);
+        return sheetId;
     }
 
     @Transactional
@@ -139,6 +146,17 @@ public class ControlSheetApplicationService {
 
             ControlSheetEventJPAEntity eventEntity = eventMapper.toEntity(event, entity, student);
             events.save(eventEntity);
+            UserActionType actionType = switch (event.eventType()) {
+                case RESULT_ENTERED -> UserActionType.CONTROL_RESULT_ENTERED;
+                case RESULT_CHANGED -> UserActionType.CONTROL_RESULT_CHANGED;
+                case REOPENED -> UserActionType.CONTROL_SHEET_REOPENED;
+                case CLOSED -> UserActionType.CONTROL_SHEET_CLOSED;
+                case ARCHIVED -> UserActionType.CONTROL_SHEET_ARCHIVED;
+            };
+            String details = event.studentID() == null
+                    ? null
+                    : "Идентификатор студента: " + event.studentID().id();
+            userActions.record(actionType, "CONTROL_SHEET", entity.getId(), details);
         }
     }
 }

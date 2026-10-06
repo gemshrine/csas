@@ -19,6 +19,8 @@ public interface CourseworkSheetRepository extends JpaRepository<CourseworkSheet
 
     Optional<CourseworkSheetJPAEntity> findByCourse_Id(Long courseId);
 
+    boolean existsByCourse_Id(Long courseId);
+
     @Query("select new com.dev.csas.coursework.CourseworkSheetReadModel(s.course.id, s.id, s.status) " +
             "from CourseworkSheetJPAEntity s where s.course.id in :courseIds")
     List<CourseworkSheetReadModel> findCourseSheetReadModels(@Param("courseIds") Collection<Long> courseIds);

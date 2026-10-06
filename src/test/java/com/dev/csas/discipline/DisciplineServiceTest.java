@@ -1,5 +1,6 @@
 package com.dev.csas.discipline;
 
+import com.dev.csas.audit.UserActionService;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
@@ -25,6 +26,8 @@ class DisciplineServiceTest {
     private DisciplineRepository disciplineRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private UserActionService userActions;
     @InjectMocks
     private DisciplineService disciplineService;
 

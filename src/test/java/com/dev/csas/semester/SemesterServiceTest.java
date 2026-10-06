@@ -1,5 +1,6 @@
 package com.dev.csas.semester;
 
+import com.dev.csas.audit.UserActionService;
 import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogBadRequestException;
 import com.dev.csas.error.CatalogConflictException;
@@ -27,6 +28,8 @@ class SemesterServiceTest {
     private SemesterRepository semesterRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private UserActionService userActions;
     @InjectMocks
     private SemesterService semesterService;
 

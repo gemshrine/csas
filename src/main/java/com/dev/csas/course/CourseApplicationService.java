@@ -1,5 +1,7 @@
 package com.dev.csas.course;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.api.course.CourseDetailsResponse;
 import com.dev.csas.api.course.CourseWorkRequest;
 import com.dev.csas.error.CatalogBadRequestException;
@@ -27,15 +29,18 @@ public class CourseApplicationService {
     private final CourseRepository courses;
     private final CourseMapper mapper;
     private final SemesterRepository semesters;
+    private final UserActionService userActions;
 
     public CourseApplicationService(
             CourseRepository courses,
             CourseMapper mapper,
-            SemesterRepository semesters
+            SemesterRepository semesters,
+            UserActionService userActions
     ) {
         this.courses = courses;
         this.mapper = mapper;
         this.semesters = semesters;
+        this.userActions = userActions;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +63,8 @@ public class CourseApplicationService {
         Course course = mapper.toDomain(entity);
         long number = course.addWork(request.title(), request.maxScore(), request.date());
         persist(course, entity);
+        userActions.record(UserActionType.COURSE_WORK_ADDED, "COURSE", courseId,
+                "Номер задания: " + number);
         return number;
     }
 
@@ -70,6 +77,8 @@ public class CourseApplicationService {
         course.updateWorkMaxScore(workNumber, request.maxScore());
         course.updateWorkDate(workNumber, request.date());
         persist(course, entity);
+        userActions.record(UserActionType.COURSE_WORK_UPDATED, "COURSE", courseId,
+                "Номер задания: " + workNumber);
     }
 
     @Transactional
@@ -79,6 +88,8 @@ public class CourseApplicationService {
         Course course = mapper.toDomain(entity);
         course.score(workNumber, new StudentID(studentId), score);
         persist(course, entity);
+        userActions.record(UserActionType.COURSE_SCORE_ENTERED, "COURSE", courseId,
+                "Номер задания: " + workNumber + ", идентификатор студента: " + studentId);
     }
 
     @Transactional
@@ -88,6 +99,7 @@ public class CourseApplicationService {
         Course course = mapper.toDomain(entity);
         course.complete();
         persist(course, entity);
+        userActions.record(UserActionType.COURSE_COMPLETED, "COURSE", courseId, null);
     }
 
     @Transactional
@@ -108,6 +120,8 @@ public class CourseApplicationService {
 
         entity.setEndSemester(semester);
         persist(course, entity);
+        userActions.record(UserActionType.COURSE_REOPENED, "COURSE", courseId,
+                "Идентификатор семестра пересдачи: " + semester.getId());
     }
 
     @Transactional
@@ -122,6 +136,8 @@ public class CourseApplicationService {
                 ));
         entity.setEndSemester(semester);
         persist(course, entity);
+        userActions.record(UserActionType.COURSE_REOPENED, "COURSE", courseId,
+                "Идентификатор семестра пересдачи: " + semester.getId());
     }
 
     @Transactional(readOnly = true)
@@ -187,8 +203,10 @@ public class CourseApplicationService {
                 ))
                 .toList();
         return new CourseDetailsResponse(
-                entity.getId(), entity.getDiscipline().getName(), entity.getGroup().getName(),
-                entity.getStartSemester().getName(), entity.getEndSemester().getName(),
+                entity.getId(), entity.getDiscipline().getId(), entity.getDiscipline().getName(),
+                entity.getGroup().getId(), entity.getGroup().getName(),
+                entity.getStartSemester().getId(), entity.getStartSemester().getName(),
+                entity.getEndSemester().getId(), entity.getEndSemester().getName(), entity.getTeacher().getId(),
                 course.type(), course.status(), works, students
         );
     }

@@ -1,5 +1,7 @@
 package com.dev.csas.student;
 
+import com.dev.csas.audit.UserActionService;
+import com.dev.csas.audit.UserActionType;
 import com.dev.csas.attendance.LectureAttendanceRepository;
 import com.dev.csas.control.ControlResultRepository;
 import com.dev.csas.course.CourseRepository;
@@ -23,6 +25,7 @@ public class StudentService {
     private final ControlResultRepository controlResultRepository;
     private final LectureAttendanceRepository lectureAttendanceRepository;
     private final CourseRepository courseRepository;
+    private final UserActionService userActions;
 
     @Transactional(readOnly = true)
     public List<StudentResponse> findAll() {
@@ -54,7 +57,9 @@ public class StudentService {
                 .status(request.status())
                 .group(resolveGroup(request.groupId()))
                 .build();
-        return StudentResponse.from(studentRepository.save(entity));
+        StudentJPAEntity saved = studentRepository.save(entity);
+        userActions.record(UserActionType.STUDENT_CREATED, "STUDENT", saved.getId(), null);
+        return StudentResponse.from(saved);
     }
 
     @Transactional
@@ -74,12 +79,19 @@ public class StudentService {
         entity.setAdmissionDate(request.admissionDate());
         entity.setStatus(request.status());
         entity.setGroup(resolveGroup(request.groupId()));
-        return StudentResponse.from(studentRepository.save(entity));
+        StudentJPAEntity saved = studentRepository.save(entity);
+        userActions.record(UserActionType.STUDENT_UPDATED, "STUDENT", saved.getId(), null);
+        return StudentResponse.from(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-        getStudent(id);
+        StudentJPAEntity student = getStudent(id);
+        if (student.getUser() != null) {
+            throw new CatalogConflictException(
+                    "Сначала удалите или отвяжите учётную запись студента"
+            );
+        }
         if (courseRepository.existsByStudents_Id(id)) {
             throw new CatalogConflictException(
                     "Нельзя удалить студента: он зачислен на курс"
@@ -92,6 +104,7 @@ public class StudentService {
             );
         }
         studentRepository.deleteById(id);
+        userActions.record(UserActionType.STUDENT_DELETED, "STUDENT", id, null);
     }
 
     private StudentJPAEntity getStudent(Long id) {

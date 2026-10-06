@@ -11,6 +11,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     min-width: 320px;
     min-height: 100vh;
@@ -259,6 +263,22 @@ a {
     border-radius: 6px;
 }
 
+.account-role-form {
+    display: grid;
+    gap: 6px;
+    min-width: 180px;
+}
+
+.account-role-form select {
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 9px;
+    color: #2d3748;
+    background: #fff;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+}
+
 .work-editor {
     margin-top: 20px;
 }
@@ -343,6 +363,31 @@ a {
     padding: 24px;
     color: #718096;
     text-align: center;
+}
+
+.account-dialog {
+    width: min(480px, calc(100% - 32px));
+    padding: 22px;
+    color: #2d3748;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 12px 32px rgba(45, 55, 72, 0.18);
+}
+
+.account-dialog::backdrop {
+    background: rgba(45, 55, 72, 0.35);
+}
+
+.account-dialog h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.account-dialog form {
+    display: grid;
+    gap: 16px;
 }
 
 .visually-hidden {
