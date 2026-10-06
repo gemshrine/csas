@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Создать курс | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/course-create.js" defer></script>
+</head>
+<body data-page="courseCreate">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <a href="/courses">Вернуться к списку курсов</a>
+    <h1 class="page-title">Создать курс</h1>
+    <p class="page-description">Курс связывает дисциплину, группу, преподавателя и период обучения.</p>
+    <p class="notice" data-global-notice role="status">Загрузка справочников.</p>
+    <section class="panel">
+        <form class="field-grid" id="course-create-form">
+            <label class="field field-full">
+                <span>Дисциплина</span>
+                <select name="disciplineId" required></select>
+            </label>
+            <label class="field field-full">
+                <span>Группа</span>
+                <select name="groupId" required></select>
+            </label>
+            <label class="field">
+                <span>Тип курса</span>
+                <select name="courseType" required>
+                    <option value="SEMINAR">Практика</option>
+                    <option value="LECTURE">Лекции</option>
+                    <option value="COURSEWORK">Курсовая работа</option>
+                </select>
+            </label>
+            <label class="field">
+                <span>Преподаватель</span>
+                <select name="teacherId" required></select>
+            </label>
+            <label class="field">
+                <span>Семестр начала</span>
+                <select name="startSemesterId" required></select>
+            </label>
+            <label class="field">
+                <span>Семестр окончания</span>
+                <select name="endSemesterId" required></select>
+            </label>
+            <div class="field-full form-actions">
+                <button class="button" type="submit">Создать курс</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

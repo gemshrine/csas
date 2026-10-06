@@ -1,128 +1,40 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Мои курсы | Учет успеваемости</title>
-  <link rel="stylesheet" href="../static/css/courses.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Курсы | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/courses.js" defer></script>
 </head>
-<body>
-
-
-<div class="page-container">
-
-
-  <header class="content-header">
-    <div>
-      <h1>Мои дисциплины и курсы</h1>
-      <p class="subtitle">Управление учебными группами и текущей успеваемостью</p>
+<body data-page="courses">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <h1 class="page-title">Курсы</h1>
+    <p class="page-description">Курсы и ведомости, доступные вашей учётной записи.</p>
+    <div class="toolbar">
+        <input class="search-input course-search" id="course-search" type="search" aria-label="Поиск курсов"
+               placeholder="Поиск по дисциплине или группе">
+        <a class="button" href="/courses/new" data-roles="DEAN" hidden>Создать курс</a>
     </div>
-
-    <div class="header-right">
-      <div class="academic-year">2026/2027 уч. год</div>
-
+    <p class="notice" data-global-notice role="status">Загрузка курсов.</p>
+    <div class="data-table-wrap">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Дисциплина</th>
+                <th>Группа</th>
+                <th>Тип курса</th>
+                <th>Период</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody id="courses-body"></tbody>
+        </table>
     </div>
-  </header>
-
-
-  <section class="filters-section">
-    <div class="search-box">
-      <input type="text" placeholder="Поиск по дисциплине или группе...">
-    </div>
-    <div class="select-box">
-      <select name="semester">
-        <option value="">Все семестры</option>
-        <option value="1">Осенний (Семестр 1)</option>
-        <option value="2">Весенний (Семестр 2)</option>
-      </select>
-    </div>
-  </section>
-
-
-  <section class="courses-grid">
-
-
-    <div class="course-card">
-      <div class="course-badge">Семестр 1</div>
-      <h3 class="course-title">Архитектура информационных систем</h3>
-      <div class="course-meta">
-        <div class="meta-item">
-          <span class="meta-icon">👥</span>
-          <span class="meta-text">Группа: <strong>ИВТ-301</strong></span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-icon">📅</span>
-          <span class="meta-text">Тип: Лекции и практики</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <span class="students-count">24 студента</span>
-        <a href="#" class="card-btn">Открыть журнал</a>
-      </div>
-    </div>
-
-
-    <div class="course-card">
-      <div class="course-badge">Семестр 1</div>
-      <h3 class="course-title">Базы данных и SQL</h3>
-      <div class="course-meta">
-        <div class="meta-item">
-          <span class="meta-icon">👥</span>
-          <span class="meta-text">Группа: <strong>ИВТ-301</strong></span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-icon">📅</span>
-          <span class="meta-text">Тип: Лабораторные работы</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <span class="students-count">24 студента</span>
-        <a href="#" class="card-btn">Открыть журнал</a>
-      </div>
-    </div>
-
-
-    <div class="course-card">
-      <div class="course-badge">Семестр 1</div>
-      <h3 class="course-title">Разработка веб-приложений</h3>
-      <div class="course-meta">
-        <div class="meta-item">
-          <span class="meta-icon">👥</span>
-          <span class="meta-text">Группа: <strong>ПИН-302</strong></span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-icon">📅</span>
-          <span class="meta-text">Тип: Курсовой проект</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <span class="students-count">18 студентов</span>
-        <a href="#" class="card-btn">Открыть журнал</a>
-      </div>
-    </div>
-
-
-    <div class="course-card disabled">
-      <div class="course-badge semester-next">Семестр 2</div>
-      <h3 class="course-title">Проектирование интерфейсов (UI/UX)</h3>
-      <div class="course-meta">
-        <div class="meta-item">
-          <span class="meta-icon">👥</span>
-          <span class="meta-text">Группа: <strong>ПИН-302</strong></span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-icon">📅</span>
-          <span class="meta-text">Тип: Лекции</span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <span class="students-count">Еще не начался</span>
-        <button class="card-btn" disabled>Журнал закрыт</button>
-      </div>
-    </div>
-
-  </section>
-</div>
-
+</main>
 </body>
 </html>

@@ -1,59 +1,18 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Навигация</title>
-    <link rel="stylesheet" href="../../static/css/menu.css">
-</head>
-<body>
-
-
-<aside class="sidebar">
-
-    <div class="sidebar-brand">
-        <span class="icon">🎓</span>
-        <h2>Учет успеваемости</h2>
-    </div>
-
-
-    <nav class="sidebar-menu">
-
-        <div class="menu-category">Преподаватель</div>
-        <a href="courses.html" class="menu-item active">
-            <span class="menu-icon">📚</span> Мои курсы
-        </a>
-        <a href="course-detail.html" class="menu-item">
-            <span class="menu-icon">📊</span> Журнал успеваемости
-        </a>
-        <a href="edit-work.html" class="menu-item">
-            <span class="menu-icon">📝</span> Ввод баллов
-        </a>
-
-        <div class="menu-category">Деканат</div>
-        <a href="students-list.html" class="menu-item">
-            <span class="menu-icon">👥</span> Реестр студентов
-        </a>
-
-        <div class="menu-category">Студент</div>
-        <a href="student-grades.html" class="menu-item">
-            <span class="menu-icon">👤</span> Моя успеваемость
-        </a>
-
+<header class="site-header" th:fragment="menu">
+    <a class="site-brand" href="/courses">Учёт успеваемости</a>
+    <nav class="site-nav" aria-label="Основная навигация">
+        <a href="/courses" data-roles="TEACHER,DEAN" hidden>Курсы</a>
+        <a href="/me/courses" data-roles="STUDENT" hidden>Моя успеваемость</a>
+        <a href="/reports" data-roles="DEAN" hidden>Отчёты</a>
+        <a href="/groups" data-roles="DEAN" hidden>Группы</a>
+        <a href="/students" data-roles="DEAN" hidden>Студенты</a>
+        <a href="/teachers" data-roles="DEAN" hidden>Преподаватели</a>
+        <a href="/disciplines" data-roles="DEAN" hidden>Дисциплины</a>
+        <a href="/semesters" data-roles="DEAN" hidden>Семестры</a>
+        <a href="/admin/users" data-roles="ADMIN" hidden>Учётные записи</a>
     </nav>
-
-
-    <div class="sidebar-user">
-        <div class="user-avatar">ИП</div>
-        <div class="user-info">
-            <span class="user-name">Иван Петров</span>
-            <span class="user-role">Преподаватель</span>
-        </div>
-        <form th:action="@{/logout}" method="post" class="logout-form">
-            <button type="submit" class="logout-btn" title="Выйти" aria-label="Выйти">🚪</button>
-        </form>
+    <div class="site-user">
+        <span><span data-user-name></span>, <span data-user-role></span></span>
+        <button class="logout-button" type="button" data-logout>Выйти</button>
     </div>
-</aside>
-
-</body>
-</html>
+</header>

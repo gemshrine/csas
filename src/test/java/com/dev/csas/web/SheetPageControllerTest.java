@@ -6,6 +6,7 @@ import com.dev.csas.api.control.ControlSheetDetailsResponse;
 import com.dev.csas.attendance.AttendanceSheetQueryService;
 import com.dev.csas.attendance.AttendanceSheetStatus;
 import com.dev.csas.control.ControlSheetQueryService;
+import com.dev.csas.coursework.CourseworkSheetQueryService;
 import com.dev.csas.control.ControlSheetStatus;
 import com.dev.csas.course.CourseStatus;
 import com.dev.csas.discipline.ControlFormEnum;
@@ -37,6 +38,9 @@ class SheetPageControllerTest {
 
     @Mock
     private AttendanceSheetQueryService attendanceSheets;
+
+    @Mock
+    private CourseworkSheetQueryService courseworkSheets;
 
     @Mock
     private CurrentActorResolver actors;

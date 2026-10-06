@@ -40,6 +40,11 @@
         });
         const payload = await responseBody(response);
         if (!response.ok) {
+            if (response.status === 401 && target !== '/api/auth/login' && target !== '/api/auth/csrf'
+                    && window.location.pathname !== '/login') {
+                const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.assign(`/login?returnUrl=${returnUrl}`);
+            }
             throw new ApiError(response.status, payload);
         }
         if (!payload?.headerName || !payload?.token) {

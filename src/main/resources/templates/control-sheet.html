@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Контрольная ведомость | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+    <script src="/js/control-sheet.js" defer></script>
+</head>
+<body data-page="controlSheet" th:attr="data-sheet-id=${sheet.id}">
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <a th:href="@{/courses/{id}(id=${sheet.course.id})}">Вернуться к курсу</a>
+    <h1 class="page-title" id="sheet-title">Контрольная ведомость</h1>
+    <p class="page-description" id="sheet-summary"></p>
+    <p class="notice" data-global-notice role="status">Загрузка ведомости.</p>
+    <p class="form-actions">
+        <a class="button button-secondary" th:href="@{/api/reports/courses/{id}/xlsx(id=${sheet.course.id})}" download>Скачать итоговую ведомость XLSX</a>
+        <a class="button button-secondary" th:href="@{/api/reports/courses/{id}/pdf(id=${sheet.course.id})}" download>Скачать итоговую ведомость PDF</a>
+    </p>
+    <section class="panel">
+        <h2>Результаты студентов</h2>
+        <div class="data-table-wrap">
+            <table class="data-table">
+                <thead id="control-results-head"></thead>
+                <tbody id="control-results-body"></tbody>
+            </table>
+        </div>
+    </section>
+    <section class="panel" id="control-actions" hidden>
+        <h2>Действия с ведомостью</h2>
+        <div class="form-actions" id="control-action-buttons"></div>
+    </section>
+</main>
+</body>
+</html>

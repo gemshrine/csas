@@ -1,8 +1,8 @@
 package com.dev.csas.web;
 
 import com.dev.csas.api.course.CourseDetailsResponse;
+import com.dev.csas.api.course.StudentCourseDetailsResponse;
 import com.dev.csas.course.CourseApplicationService;
-import com.dev.csas.course.CourseQueryService;
 import com.dev.csas.course.CourseStatus;
 import com.dev.csas.course.CourseType;
 import com.dev.csas.course.StudentCourseQueryService;
@@ -12,6 +12,7 @@ import com.dev.csas.security.CurrentActorResolver;
 import com.dev.csas.security.SecurityConfiguration;
 import com.dev.csas.semester.SemesterService;
 import com.dev.csas.shared.DeanID;
+import com.dev.csas.shared.StudentID;
 import com.dev.csas.student.StudentService;
 import com.dev.csas.teacher.TeacherService;
 import org.junit.jupiter.api.Test;
@@ -35,15 +36,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({ApplicationPageController.class, CatalogPageController.class})
+@WebMvcTest({ApplicationPageController.class, CatalogPageController.class, AdminPageController.class,
+        ReportPageController.class})
 @Import(SecurityConfiguration.class)
 class ApplicationPageSecurityTest {
 
     @Autowired
     private MockMvc mvc;
-
-    @MockitoBean
-    private CourseQueryService courses;
 
     @MockitoBean
     private CourseApplicationService courseDetails;
@@ -101,6 +100,83 @@ class ApplicationPageSecurityTest {
     @WithMockUser(username = "teacher", roles = "TEACHER")
     void deniesTeacherFromStudentCoursePages() throws Exception {
         mvc.perform(get("/me/courses"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "teacher", roles = "TEACHER")
+    void deniesTeacherFromCourseCreationPage() throws Exception {
+        mvc.perform(get("/courses/new"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deanCanOpenCourseCreationPage() throws Exception {
+        mvc.perform(get("/courses/new"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Создать курс")));
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deanCanOpenCatalogPage() throws Exception {
+        when(groups.findAll()).thenReturn(List.of());
+
+        mvc.perform(get("/groups"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Справочник")));
+    }
+
+    @Test
+    @WithMockUser(username = "student", roles = "STUDENT")
+    void studentCanOpenOwnCoursesPage() throws Exception {
+        mvc.perform(get("/me/courses"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Моя успеваемость")));
+    }
+
+    @Test
+    @WithMockUser(username = "student", roles = "STUDENT")
+    void studentCanOpenOwnCourseDetailsPage() throws Exception {
+        when(actors.student(any(Authentication.class))).thenReturn(new StudentID(7));
+        when(studentCourses.get(new StudentID(7), 3)).thenReturn(new StudentCourseDetailsResponse(
+                3, "Дисциплина", "Группа", "Семестр 1", "Семестр 2", CourseType.SEMINAR,
+                CourseStatus.IN_PROGRESS, 90.0, null, null, null, List.of()
+        ));
+
+        mvc.perform(get("/me/courses/3"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-course-id=\"3\"")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminCanOpenAccountManagementPage() throws Exception {
+        mvc.perform(get("/admin/users"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Учётные записи")));
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deniesDeanFromAccountManagementPage() throws Exception {
+        mvc.perform(get("/admin/users"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deanCanOpenReportsPage() throws Exception {
+        mvc.perform(get("/reports"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Скачать список должников XLSX")));
+    }
+
+    @Test
+    @WithMockUser(username = "student", roles = "STUDENT")
+    void deniesStudentFromReportsPage() throws Exception {
+        mvc.perform(get("/reports"))
                 .andExpect(status().isForbidden());
     }
 

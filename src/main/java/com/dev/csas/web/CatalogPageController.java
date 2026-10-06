@@ -89,13 +89,13 @@ public class CatalogPageController {
         model.addAttribute("catalogType", type);
         model.addAttribute("items", items);
         model.addAttribute("item", null);
-        return "catalog/" + type;
+        return "catalog";
     }
 
     private String detail(String type, Object item, Model model) {
         model.addAttribute("catalogType", type);
         model.addAttribute("items", List.of());
         model.addAttribute("item", item);
-        return "catalog/" + type;
+        return "catalog";
     }
 }

@@ -57,9 +57,12 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/reports/students/me/**").hasRole("STUDENT")
                         .requestMatchers("/api/reports/students/*/**").hasAnyRole("STUDENT", "DEAN")
                         .requestMatchers("/api/reports/groups/**", "/api/reports/debtors.xlsx",
-                                "/api/reports/statistics.xlsx").hasRole("DEAN")
-                        .requestMatchers("/api/reports/courses/*/xlsx", "/api/reports/attendance-sheets/*/xlsx",
-                                "/api/reports/coursework-sheets/*/xlsx").hasAnyRole("TEACHER", "DEAN")
+                                "/api/reports/debtors.pdf", "/api/reports/statistics.xlsx",
+                                "/api/reports/statistics.pdf").hasRole("DEAN")
+                        .requestMatchers("/api/reports/courses/*/xlsx", "/api/reports/courses/*/pdf",
+                                "/api/reports/attendance-sheets/*/xlsx", "/api/reports/attendance-sheets/*/pdf",
+                                "/api/reports/coursework-sheets/*/xlsx", "/api/reports/coursework-sheets/*/pdf")
+                        .hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers("/api/reports/**").authenticated()
                         .requestMatchers(
                                 "/api/groups/**",
@@ -136,8 +139,12 @@ public class SecurityConfiguration {
                         )
                         .permitAll()
                         .requestMatchers("/me/courses", "/me/courses/**").hasRole("STUDENT")
+                        .requestMatchers("/admin/users", "/admin/users/**").hasRole("ADMIN")
+                        .requestMatchers("/reports").hasRole("DEAN")
+                        .requestMatchers("/courses/new").hasRole("DEAN")
                         .requestMatchers(HttpMethod.POST, "/courses/*/reopen").hasRole("DEAN")
-                        .requestMatchers("/courses/**", "/control-sheets/**", "/attendance-sheets/**")
+                        .requestMatchers("/courses/**", "/control-sheets/**", "/attendance-sheets/**",
+                                "/coursework-sheets/**")
                         .hasAnyRole("TEACHER", "DEAN")
                         .requestMatchers(
                                 "/groups/**",
