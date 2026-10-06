@@ -2,6 +2,8 @@ package com.dev.csas.web;
 
 import com.dev.csas.api.course.CourseDetailsResponse;
 import com.dev.csas.api.course.StudentCourseDetailsResponse;
+import com.dev.csas.backup.DatabaseBackupException;
+import com.dev.csas.backup.DatabaseBackupService;
 import com.dev.csas.course.CourseApplicationService;
 import com.dev.csas.course.CourseStatus;
 import com.dev.csas.course.CourseType;
@@ -16,6 +18,7 @@ import com.dev.csas.shared.StudentID;
 import com.dev.csas.student.StudentService;
 import com.dev.csas.teacher.TeacherService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -23,26 +26,35 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({ApplicationPageController.class, CatalogPageController.class, AdminPageController.class,
-        ReportPageController.class})
+        ReportPageController.class, DatabaseBackupController.class})
 @Import(SecurityConfiguration.class)
 class ApplicationPageSecurityTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @TempDir
+    private Path temporaryDirectory;
 
     @MockitoBean
     private CourseApplicationService courseDetails;
@@ -67,6 +79,9 @@ class ApplicationPageSecurityTest {
 
     @MockitoBean
     private SemesterService semesters;
+
+    @MockitoBean
+    private DatabaseBackupService backups;
 
     @Test
     void redirectsUnauthenticatedPageRequestToLoginAndKeepsReturnUrl() throws Exception {
@@ -166,6 +181,55 @@ class ApplicationPageSecurityTest {
         mvc.perform(get("/admin/audit-events"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Журнал действий")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminCanOpenDatabaseBackupPage() throws Exception {
+        mvc.perform(get("/admin/backups"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Создать и скачать копию")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("name=\"_csrf\"")));
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void deniesDeanFromDatabaseBackupPage() throws Exception {
+        mvc.perform(get("/admin/backups"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void redirectsToBackupPageWhenDatabaseBackupFails() throws Exception {
+        org.mockito.Mockito.doThrow(new DatabaseBackupException("failed", new IllegalStateException()))
+                .when(backups).createBackup();
+
+        mvc.perform(post("/admin/backups").with(csrf()))
+                .andExpect(status().isSeeOther())
+                .andExpect(redirectedUrl("/admin/backups?error=creation"));
+
+        mvc.perform(get("/admin/backups").queryParam("error", "creation"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Не удалось создать резервную копию")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void downloadsBackupArchiveFromMvcEndpoint() throws Exception {
+        byte[] archive = {4, 3, 2, 1};
+        Path backup = temporaryDirectory.resolve("backup.dump");
+        Files.write(backup, archive);
+        org.mockito.Mockito.when(backups.createBackup()).thenReturn(backup);
+
+        MvcResult result = mvc.perform(post("/admin/backups").with(csrf()))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mvc.perform(asyncDispatch(result))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.startsWith("attachment;")))
+                .andExpect(content().bytes(archive));
     }
 
     @Test

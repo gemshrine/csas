@@ -141,7 +141,8 @@ public class SecurityConfiguration {
                         )
                         .permitAll()
                         .requestMatchers("/me/courses", "/me/courses/**").hasRole("STUDENT")
-                        .requestMatchers("/admin/users", "/admin/users/**", "/admin/audit-events")
+                        .requestMatchers("/admin/users", "/admin/users/**", "/admin/audit-events",
+                                "/admin/backups")
                         .hasRole("ADMIN")
                         .requestMatchers("/reports").hasRole("DEAN")
                         .requestMatchers("/courses/new").hasRole("DEAN")

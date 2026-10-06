@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Резервные копии | Учёт успеваемости</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <script src="/api-client.js" defer></script>
+    <script src="/js/app.js" defer></script>
+</head>
+<body>
+<div th:replace="~{fragments/menu :: menu}"></div>
+<main class="page-shell">
+    <h1 class="page-title">Резервные копии</h1>
+    <p class="page-description">Создание полной копии базы данных PostgreSQL.</p>
+    <p class="notice" role="alert" th:if="${backupError}" th:text="${backupError}"></p>
+    <section class="panel">
+        <p>Резервная копия будет загружена на это устройство в формате PostgreSQL custom archive.</p>
+        <p>Храните файл отдельно от компьютера с базой данных. Для восстановления используйте pg_restore и предварительно созданную пустую базу данных.</p>
+        <form th:action="@{/admin/backups}" method="post">
+            <button class="button" type="submit">Создать и скачать копию</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
