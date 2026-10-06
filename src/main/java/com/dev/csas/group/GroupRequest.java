@@ -31,6 +31,8 @@ public record GroupRequest(
         EducationFormEnum educationForm,
 
         @NotNull(message = "Форма занятий обязательна")
-        StudyFormEnum studyForm
+        StudyFormEnum studyForm,
+
+        Long curatorId
 ) {
 }

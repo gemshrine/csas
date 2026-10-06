@@ -10,7 +10,9 @@ public record GroupResponse(
         String specialty,
         Integer course,
         EducationFormEnum educationForm,
-        StudyFormEnum studyForm
+        StudyFormEnum studyForm,
+        Long curatorId,
+        String curatorUsername
 ) {
     public static GroupResponse from(GroupJPAEntity entity) {
         return new GroupResponse(
@@ -20,7 +22,9 @@ public record GroupResponse(
                 entity.getSpecialty(),
                 entity.getCourse(),
                 entity.getEducationForm(),
-                entity.getStudyForm()
+                entity.getStudyForm(),
+                entity.getCurator() == null ? null : entity.getCurator().getId(),
+                entity.getCurator() == null ? null : entity.getCurator().getUsername()
         );
     }
 }

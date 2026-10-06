@@ -104,12 +104,25 @@ class CatalogApiControllerTest {
                 "Информатика",
                 4,
                 EducationFormEnum.BUDGET,
-                StudyFormEnum.FULL_TIME
+                StudyFormEnum.FULL_TIME,
+                null,
+                null
         )));
 
         mvc.perform(get("/api/groups"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("ИВТ-41-1"));
+    }
+
+    @Test
+    @WithMockUser(username = "dean", roles = "DEAN")
+    void allowsDeanToListGroupCurators() throws Exception {
+        when(groupService.findCurators()).thenReturn(List.of(new GroupCuratorResponse(8L, "dean")));
+
+        mvc.perform(get("/api/groups/curators"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(8))
+                .andExpect(jsonPath("$[0].username").value("dean"));
     }
 
     @Test
@@ -168,7 +181,9 @@ class CatalogApiControllerTest {
                 "Информатика",
                 4,
                 EducationFormEnum.BUDGET,
-                StudyFormEnum.FULL_TIME
+                StudyFormEnum.FULL_TIME,
+                null,
+                null
         ));
 
         mvc.perform(post("/api/groups").with(csrf())

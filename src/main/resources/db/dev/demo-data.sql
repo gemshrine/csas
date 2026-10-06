@@ -13,8 +13,10 @@ INSERT INTO teachers (first_name, last_name, department, position, user_id)
 SELECT 'Иван', 'Лекторов', 'Информатика', 'Преподаватель', id
 FROM users WHERE username = 'demo-lecture';
 
-INSERT INTO groups (name, year_of_admission, specialty, course, education_form, study_form)
-VALUES ('DEMO-301', 2024, 'Программная инженерия', 3, 'BUDGET', 'FULL_TIME');
+INSERT INTO groups (name, year_of_admission, specialty, course, education_form, study_form, curator_id)
+SELECT 'DEMO-301', 2024, 'Программная инженерия', 3, 'BUDGET', 'FULL_TIME', id
+FROM users
+WHERE username = 'demo-dean';
 
 INSERT INTO students (first_name, last_name, patronymic, record_book_number, group_id, user_id)
 SELECT 'Алексей', 'Тестов', 'Демо', 'DEMO0001', g.id, u.id

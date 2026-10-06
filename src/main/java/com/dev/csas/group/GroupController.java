@@ -27,6 +27,11 @@ public class GroupController {
         return groupService.findAll();
     }
 
+    @GetMapping("/curators")
+    public List<GroupCuratorResponse> findCurators() {
+        return groupService.findCurators();
+    }
+
     @GetMapping("/{id}")
     public GroupResponse findById(@PathVariable Long id) {
         return groupService.findById(id);

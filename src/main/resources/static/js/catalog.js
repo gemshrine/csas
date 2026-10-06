@@ -10,10 +10,11 @@
                 ['specialty', 'Специальность', 'text', true],
                 ['course', 'Курс обучения', 'number', true],
                 ['educationForm', 'Форма финансирования', 'select', true, [['BUDGET', 'Бюджет'], ['CONTRACT', 'Договор']]],
-                ['studyForm', 'Форма обучения', 'select', true, [['FULL_TIME', 'Очная'], ['PART_TIME', 'Очно-заочная'], ['EXTRAMURAL', 'Заочная']]]
+                ['studyForm', 'Форма обучения', 'select', true, [['FULL_TIME', 'Очная'], ['PART_TIME', 'Очно-заочная'], ['EXTRAMURAL', 'Заочная']]],
+                ['curatorId', 'Куратор группы', 'deans', false]
             ],
             columns: [['name', 'Название'], ['specialty', 'Специальность'], ['course', 'Курс'],
-                ['educationForm', 'Финансирование'], ['studyForm', 'Форма обучения']]
+                ['educationForm', 'Финансирование'], ['studyForm', 'Форма обучения'], ['curator', 'Куратор']]
         },
         students: {
             title: 'Студенты', endpoint: '/api/students',
@@ -67,11 +68,15 @@
     const config = catalogs[type];
     let records = [];
     let groups = [];
+    let deans = [];
     let editingId = null;
 
     function valueFor(record, key) {
         if (key === 'group') {
             return record.group?.name || 'Не назначена';
+        }
+        if (key === 'curator') {
+            return record.curatorUsername || 'Не назначен';
         }
         if (['educationForm', 'studyForm', 'status', 'gender', 'controlForm'].includes(key)) {
             return label(record[key]);
@@ -129,7 +134,9 @@
         detail.replaceChildren();
         document.getElementById('catalog-detail-title').textContent = `Карточка: ${displayName(record)}`;
         config.fields.forEach(([key, title]) => {
-            const value = key === 'groupId' ? valueFor(record, 'group') : valueFor(record, key);
+            const value = key === 'groupId'
+                ? valueFor(record, 'group')
+                : key === 'curatorId' ? valueFor(record, 'curator') : valueFor(record, key);
             detail.append(node('dt', {}, title), node('dd', {}, value));
         });
         const reportActions = document.getElementById('catalog-report-actions');
@@ -177,12 +184,14 @@
             const wrapper = node('label', {className: 'field'});
             wrapper.append(node('span', {}, title));
             let input;
-            if (kind === 'select' || kind === 'groups') {
+            if (kind === 'select' || kind === 'groups' || kind === 'deans') {
                 input = node('select', {attributes: {name: key}});
                 input.append(node('option', {value: ''}, 'Не выбрано'));
                 const values = kind === 'groups'
                     ? groups.map(group => [String(group.id), group.name])
-                    : options;
+                    : kind === 'deans'
+                        ? deans.map(dean => [String(dean.id), dean.username])
+                        : options;
                 values.forEach(([value, text]) => input.append(node('option', {value}, text)));
             } else if (kind === 'textarea') {
                 input = node('textarea', {attributes: {name: key, rows: '3'}});
@@ -216,7 +225,7 @@
     function payloadFrom(form) {
         const data = Object.fromEntries(new FormData(form).entries());
         config.fields.forEach(([key, , kind]) => {
-            if (kind === 'number' || kind === 'groups') {
+            if (kind === 'number' || kind === 'groups' || kind === 'deans') {
                 data[key] = data[key] === '' ? null : Number(data[key]);
             } else if (data[key] === '') {
                 data[key] = null;
@@ -229,6 +238,9 @@
         records = await window.CsasApi.request(config.endpoint);
         if (type === 'students') {
             groups = await window.CsasApi.request('/api/groups');
+        }
+        if (type === 'groups') {
+            deans = await window.CsasApi.request('/api/groups/curators');
         }
         renderTable();
     }
