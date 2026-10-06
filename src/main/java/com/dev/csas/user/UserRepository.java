@@ -10,5 +10,7 @@ public interface UserRepository extends JpaRepository<UserJPAEntity, Long> {
 
     List<UserJPAEntity> findAllByOrderByIdAsc();
 
+    List<UserJPAEntity> findAllByRoleAndEnabledTrueOrderByIdAsc(RoleEnum role);
+
     long countByRoleAndEnabledTrue(RoleEnum role);
 }

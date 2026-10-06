@@ -111,6 +111,12 @@
 | POST | `/api/groups` | 201 |
 | PUT | `/api/groups/{id}` | 200 или 404 |
 | DELETE | `/api/groups/{id}` | 204, 404 или 409 |
+| GET | `/api/groups/curators` | 200, список активных пользователей `DEAN` |
+
+В запросах создания и изменения группы поле `curatorId` необязательное. Если оно
+задано, пользователь должен иметь активную учётную запись с ролью `DEAN`; значение
+`null` снимает назначение. Ответ группы содержит `curatorId` и `curatorUsername`.
+Роль назначенного куратора нельзя изменить, пока он закреплён за группой.
 
 Пример создания:
 
@@ -123,7 +129,8 @@ curl -X POST http://localhost:8080/api/groups \
     "specialty": "Информатика и вычислительная техника",
     "course": 4,
     "educationForm": "BUDGET",
-    "studyForm": "FULL_TIME"
+    "studyForm": "FULL_TIME",
+    "curatorId": 1
   }'
 ```
 

@@ -4,6 +4,9 @@ import com.dev.csas.course.CourseRepository;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
 import com.dev.csas.student.StudentRepository;
+import com.dev.csas.user.RoleEnum;
+import com.dev.csas.user.UserJPAEntity;
+import com.dev.csas.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<GroupResponse> findAll() {
@@ -40,6 +44,7 @@ public class GroupService {
                 .course(request.course())
                 .educationForm(request.educationForm())
                 .studyForm(request.studyForm())
+                .curator(resolveCurator(request.curatorId()))
                 .build();
         return GroupResponse.from(groupRepository.save(entity));
     }
@@ -54,7 +59,15 @@ public class GroupService {
         entity.setCourse(request.course());
         entity.setEducationForm(request.educationForm());
         entity.setStudyForm(request.studyForm());
+        entity.setCurator(resolveCurator(request.curatorId()));
         return GroupResponse.from(groupRepository.save(entity));
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupCuratorResponse> findCurators() {
+        return userRepository.findAllByRoleAndEnabledTrueOrderByIdAsc(RoleEnum.DEAN).stream()
+                .map(user -> new GroupCuratorResponse(user.getId(), user.getUsername()))
+                .toList();
     }
 
     @Transactional
@@ -71,6 +84,20 @@ public class GroupService {
     private GroupJPAEntity getGroup(Long id) {
         return groupRepository.findById(id)
                 .orElseThrow(() -> CatalogNotFoundException.group(id));
+    }
+
+    private UserJPAEntity resolveCurator(Long curatorId) {
+        if (curatorId == null) {
+            return null;
+        }
+        UserJPAEntity user = userRepository.findById(curatorId)
+                .orElseThrow(() -> new CatalogNotFoundException(
+                        "Пользователь с id " + curatorId + " не найден"
+                ));
+        if (user.getRole() != RoleEnum.DEAN || !user.isEnabled()) {
+            throw new CatalogConflictException("Куратором группы может быть только активный пользователь с ролью DEAN");
+        }
+        return user;
     }
 
     private void ensureNameUnique(String name, Long currentId) {

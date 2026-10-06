@@ -3,6 +3,7 @@ package com.dev.csas.user;
 import com.dev.csas.api.user.UserAccountResponse;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
+import com.dev.csas.group.GroupRepository;
 import com.dev.csas.student.StudentRepository;
 import com.dev.csas.teacher.TeacherRepository;
 import org.springframework.session.FindByIndexNameSessionRepository;
@@ -18,17 +19,20 @@ public class UserAdministrationService {
     private final UserRepository users;
     private final TeacherRepository teachers;
     private final StudentRepository students;
+    private final GroupRepository groups;
     private final FindByIndexNameSessionRepository<? extends Session> sessions;
 
     public UserAdministrationService(
             UserRepository users,
             TeacherRepository teachers,
             StudentRepository students,
+            GroupRepository groups,
             FindByIndexNameSessionRepository<? extends Session> sessions
     ) {
         this.users = users;
         this.teachers = teachers;
         this.students = students;
+        this.groups = groups;
         this.sessions = sessions;
     }
 
@@ -46,10 +50,15 @@ public class UserAdministrationService {
                         "Учётная запись с id " + userId + " не найдена"
                 ));
 
-        validateProfileLink(userId, role);
         if (user.getRole() == role) {
             return UserAccountResponse.from(user);
         }
+        if (user.getRole() == RoleEnum.DEAN && role != RoleEnum.DEAN && groups.existsByCurator_Id(userId)) {
+            throw new CatalogConflictException(
+                    "Нельзя изменить роль: пользователь назначен куратором одной или нескольких групп"
+            );
+        }
+        validateProfileLink(userId, role);
         if (user.getRole() == RoleEnum.ADMIN && role != RoleEnum.ADMIN
                 && user.isEnabled() && users.countByRoleAndEnabledTrue(RoleEnum.ADMIN) == 1) {
             throw new CatalogConflictException(

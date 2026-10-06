@@ -3,6 +3,7 @@ package com.dev.csas.user;
 import com.dev.csas.api.user.UserAccountResponse;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
+import com.dev.csas.group.GroupRepository;
 import com.dev.csas.student.StudentRepository;
 import com.dev.csas.teacher.TeacherJPAEntity;
 import com.dev.csas.teacher.TeacherRepository;
@@ -35,6 +36,8 @@ class UserAdministrationServiceTest {
     private TeacherRepository teachers;
     @Mock
     private StudentRepository students;
+    @Mock
+    private GroupRepository groups;
     @Mock
     private FindByIndexNameSessionRepository<? extends Session> sessions;
     @InjectMocks
@@ -117,6 +120,17 @@ class UserAdministrationServiceTest {
         assertThatThrownBy(() -> service.changeRole(3L, RoleEnum.DEAN))
                 .isInstanceOf(CatalogConflictException.class)
                 .hasMessage("Нельзя изменить роль последнего активного администратора");
+        verify(users, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void refusesToChangeRoleOfAssignedGroupCurator() {
+        when(users.findById(3L)).thenReturn(Optional.of(user(3L, "dean", RoleEnum.DEAN)));
+        when(groups.existsByCurator_Id(3L)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.changeRole(3L, RoleEnum.ADMIN))
+                .isInstanceOf(CatalogConflictException.class)
+                .hasMessageContaining("назначен куратором");
         verify(users, never()).save(org.mockito.ArgumentMatchers.any());
     }
 

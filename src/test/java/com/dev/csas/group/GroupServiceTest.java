@@ -6,6 +6,9 @@ import com.dev.csas.enums.StudyFormEnum;
 import com.dev.csas.error.CatalogConflictException;
 import com.dev.csas.error.CatalogNotFoundException;
 import com.dev.csas.student.StudentRepository;
+import com.dev.csas.user.RoleEnum;
+import com.dev.csas.user.UserJPAEntity;
+import com.dev.csas.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +34,8 @@ class GroupServiceTest {
     private StudentRepository studentRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private UserRepository userRepository;
     @InjectMocks
     private GroupService groupService;
 
@@ -66,6 +71,60 @@ class GroupServiceTest {
 
         assertThat(created.id()).isEqualTo(1L);
         assertThat(created.specialty()).isEqualTo("Информатика");
+    }
+
+    @Test
+    void createAssignsActiveDeanAsCurator() {
+        UserJPAEntity dean = UserJPAEntity.builder()
+                .id(17L)
+                .username("dean")
+                .role(RoleEnum.DEAN)
+                .enabled(true)
+                .build();
+        when(userRepository.findById(17L)).thenReturn(Optional.of(dean));
+        when(groupRepository.existsByName("ИВТ-41-1")).thenReturn(false);
+        when(groupRepository.save(any())).thenAnswer(invocation -> {
+            GroupJPAEntity entity = invocation.getArgument(0);
+            entity.setId(1L);
+            return entity;
+        });
+
+        GroupResponse created = groupService.create(request("ИВТ-41-1", 17L));
+
+        assertThat(created.curatorId()).isEqualTo(17L);
+        assertThat(created.curatorUsername()).isEqualTo("dean");
+    }
+
+    @Test
+    void createRejectsUserWithoutDeanRoleAsCurator() {
+        UserJPAEntity teacher = UserJPAEntity.builder()
+                .id(17L)
+                .username("teacher")
+                .role(RoleEnum.TEACHER)
+                .enabled(true)
+                .build();
+        when(groupRepository.existsByName("ИВТ-41-1")).thenReturn(false);
+        when(userRepository.findById(17L)).thenReturn(Optional.of(teacher));
+
+        assertThatThrownBy(() -> groupService.create(request("ИВТ-41-1", 17L)))
+                .isInstanceOf(CatalogConflictException.class)
+                .hasMessageContaining("только активный пользователь с ролью DEAN");
+        verify(groupRepository, never()).save(any());
+    }
+
+    @Test
+    void listsEnabledDeanAccountsAsCuratorOptions() {
+        UserJPAEntity dean = UserJPAEntity.builder()
+                .id(17L)
+                .username("dean")
+                .role(RoleEnum.DEAN)
+                .enabled(true)
+                .build();
+        when(userRepository.findAllByRoleAndEnabledTrueOrderByIdAsc(RoleEnum.DEAN))
+                .thenReturn(List.of(dean));
+
+        assertThat(groupService.findCurators())
+                .containsExactly(new GroupCuratorResponse(17L, "dean"));
     }
 
     @Test
@@ -124,13 +183,18 @@ class GroupServiceTest {
     }
 
     private static GroupRequest request(String name) {
+        return request(name, null);
+    }
+
+    private static GroupRequest request(String name, Long curatorId) {
         return new GroupRequest(
                 name,
                 2022,
                 "Информатика",
                 4,
                 EducationFormEnum.BUDGET,
-                StudyFormEnum.FULL_TIME
+                StudyFormEnum.FULL_TIME,
+                curatorId
         );
     }
 

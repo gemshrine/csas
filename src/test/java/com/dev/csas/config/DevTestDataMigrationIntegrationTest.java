@@ -39,6 +39,7 @@ class DevTestDataMigrationIntegrationTest {
         Flyway.configure()
                 .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
                 .locations("classpath:db/migration", "classpath:db/dev/migration")
+                .outOfOrder(true)
                 .load()
                 .migrate();
 
@@ -63,6 +64,18 @@ class DevTestDataMigrationIntegrationTest {
                 """));
         assertEquals(20, count(jdbc, "SELECT COUNT(*) FROM students WHERE record_book_number LIKE 'TST%'"));
         assertEquals(5, count(jdbc, "SELECT COUNT(*) FROM groups WHERE name LIKE 'TEST-%'"));
+        assertEquals(1, count(jdbc, """
+                SELECT COUNT(*)
+                FROM groups
+                JOIN users ON users.id = groups.curator_id
+                WHERE groups.name = 'DEMO-301' AND users.username = 'demo-dean'
+                """));
+        assertEquals(5, count(jdbc, """
+                SELECT COUNT(*)
+                FROM groups
+                JOIN users ON users.id = groups.curator_id
+                WHERE groups.name LIKE 'TEST-%' AND users.username = 'lab1-test-dean'
+                """));
         assertEquals(15, count(jdbc, "SELECT COUNT(*) FROM disciplines WHERE name LIKE 'Тестовая дисциплина %'"));
         assertEquals(10, count(jdbc, """
                 SELECT COUNT(*)
