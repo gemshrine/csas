@@ -25,3 +25,7 @@ server:
   servlet:
     session:
       timeout: 5m
+app:
+  backup:
+    container: ${POSTGRES_CONTAINER:postgres}
+    timeout-seconds: ${BACKUP_TIMEOUT_SECONDS:300}
