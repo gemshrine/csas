@@ -1,5 +1,5 @@
 (() => {
-    const {node, label, formatPercentage, setNotice, message} = window.CsasUi;
+    const {node, label, formatPercentage, formatScore, setNotice, message} = window.CsasUi;
     const courseId = Number(document.body.dataset.courseId);
 
     function addDetail(container, title, value) {
@@ -22,13 +22,17 @@
                 if (course.controlResult) {
                     addDetail(result, 'Форма контроля', label(course.controlResult.controlForm));
                     addDetail(result, 'Состояние ведомости', label(course.controlResult.sheetStatus));
-                    if (course.controlResult.sheetStatus === 'CLOSED') {
-                        if (course.controlResult.finalScore !== null) {
-                            addDetail(result, 'Итоговый балл', String(course.controlResult.finalScore));
-                            addDetail(result, 'Итоговая оценка', String(course.controlResult.finalGrade));
-                        } else {
-                            addDetail(result, 'Результат', label(course.controlResult.passFail));
-                        }
+                    if (course.controlResult.numericScore !== null) {
+                        const scoreLabel = course.controlResult.controlForm === 'EXAM'
+                            ? 'Балл за экзамен'
+                            : 'Балл за дифференцированный зачёт';
+                        addDetail(result, scoreLabel, String(course.controlResult.numericScore));
+                    }
+                    if (course.controlResult.finalScore !== null) {
+                        addDetail(result, 'Итоговый балл', formatScore(course.controlResult.finalScore));
+                        addDetail(result, 'Итоговая оценка', String(course.controlResult.finalGrade));
+                    } else if (course.controlResult.passFail !== null) {
+                        addDetail(result, 'Результат', label(course.controlResult.passFail));
                     } else {
                         addDetail(result, 'Результат контроля', 'Ещё не выставлен');
                     }

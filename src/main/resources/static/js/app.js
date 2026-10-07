@@ -105,6 +105,10 @@
         return `${new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 0}).format(value)}%`;
     }
 
+    function formatScore(value) {
+        return new Intl.NumberFormat('ru-RU', {maximumFractionDigits: 2}).format(value);
+    }
+
     async function withPending(button, pendingText, action) {
         const originalText = button.textContent;
         button.disabled = true;
@@ -180,6 +184,6 @@
         }
     }
 
-    window.CsasUi = Object.freeze({message, setNotice, node, label, formatPercentage, withPending, confirmAndRun, formJson});
+    window.CsasUi = Object.freeze({message, setNotice, node, label, formatPercentage, formatScore, withPending, confirmAndRun, formJson});
     document.addEventListener('DOMContentLoaded', initialize);
 })();
