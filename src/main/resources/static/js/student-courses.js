@@ -1,5 +1,5 @@
 (() => {
-    const {node, label, setNotice, message} = window.CsasUi;
+    const {node, label, formatPercentage, setNotice, message} = window.CsasUi;
 
     function resultFor(course) {
         if (course.courseType === 'COURSEWORK') {
@@ -13,7 +13,7 @@
                 : label(course.controlResult.passFail);
         }
         if (course.courseType === 'SEMINAR') {
-            return course.rating === null ? 'Рейтинг не рассчитан' : `Рейтинг ${course.rating}%`;
+            return course.rating === null ? 'Рейтинг не рассчитан' : `Рейтинг ${formatPercentage(course.rating)}`;
         }
         return 'Нет итогового результата';
     }

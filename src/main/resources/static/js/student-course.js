@@ -1,5 +1,5 @@
 (() => {
-    const {node, label, setNotice, message} = window.CsasUi;
+    const {node, label, formatPercentage, setNotice, message} = window.CsasUi;
     const courseId = Number(document.body.dataset.courseId);
 
     function addDetail(container, title, value) {
@@ -18,7 +18,7 @@
             const result = document.getElementById('student-course-result');
             result.replaceChildren(node('h2', {}, 'Итоговые данные'));
             if (course.courseType === 'SEMINAR') {
-                addDetail(result, 'Рейтинг', course.rating === null ? 'Не рассчитан' : `${course.rating}%`);
+                addDetail(result, 'Рейтинг', course.rating === null ? 'Не рассчитан' : formatPercentage(course.rating));
                 if (course.controlResult) {
                     addDetail(result, 'Форма контроля', label(course.controlResult.controlForm));
                     addDetail(result, 'Состояние ведомости', label(course.controlResult.sheetStatus));

@@ -1,5 +1,5 @@
 (() => {
-    const {node, label, setNotice, message, withPending, confirmAndRun, formJson} = window.CsasUi;
+    const {node, label, formatPercentage, setNotice, message, withPending, confirmAndRun, formJson} = window.CsasUi;
     const courseId = Number(document.body.dataset.courseId);
     let course;
     let courseSummary;
@@ -221,7 +221,7 @@
                 }
                 row.append(cell);
             });
-            row.append(node('td', {}, student.rating === null ? 'Нет данных' : `${student.rating}%`));
+            row.append(node('td', {}, student.rating === null ? 'Нет данных' : formatPercentage(student.rating)));
             body.append(row);
         });
         table.append(body);
